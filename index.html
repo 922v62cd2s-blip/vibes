@@ -183,7 +183,7 @@ const Btn = ({ onClick, children, variant = 'primary', style: s = {}, disabled }
   };
   return (
     <button onClick={onClick} disabled={disabled} style={{
-      ...styles[variant], padding: '10px 18px', borderRadius: var => '10px', border: 'none',
+      ...styles[variant], padding: '10px 18px', border: 'none',
       borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer', fontSize: 14, fontFamily: 'Sora',
       display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', transition: 'opacity .15s',
       opacity: disabled ? .4 : 1, ...s
