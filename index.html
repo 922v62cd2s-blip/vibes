@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Life Dashboard"/>
+<meta name="theme-color" content="#0f0f11"/>
+<title>Life Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2a2a32;
+    --text: #f0f0f2;
+    --text2: #8888a0;
+    --accent: #d4a853;
+    --accent2: #e8c278;
+    --personal: #5b8cff;
+    --kala: #c97cf4;
+    --mandir: #f4a14e;
+    --other: #4ecda4;
+    --danger: #ff5f6d;
+    --success: #3dd68c;
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+  [data-light] {
+    --bg: #f5f5f7;
+    --surface: #ffffff;
+    --surface2: #f0f0f4;
+    --border: #e0e0e8;
+    --text: #1a1a2e;
+    --text2: #666680;
+    --accent: #b8860b;
+    --accent2: #d4a020;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { background: var(--bg); }
+  body {
+    font-family: 'Sora', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+  }
+  #root { min-height: 100vh; }
+  input, textarea, select {
+    font-family: 'Sora', sans-serif;
+    font-size: 16px; /* prevents iOS zoom */
+  }
+  ::-webkit-scrollbar { width: 0; }
+  .mono { font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+// ─── Storage helpers ────────────────────────────────────────────────────────
+const STORAGE_KEY = 'lifedash_v2';
+const load = () => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; } };
+const save = (data) => localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+
+// ─── Sample data ─────────────────────────────────────────────────────────────
+const today = () => new Date().toISOString().split('T')[0];
+const daysFrom = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return d.toISOString().split('T')[0]; };
+
+const SAMPLE = {
+  inbox: [
+    { id: 'i1', text: 'Call Dev about Diwali event', createdAt: today(), pinned: false },
+    { id: 'i2', text: 'Need purple flowers for altar piece', createdAt: today(), pinned: false },
+    { id: 'i3', text: 'Ship Megha order ASAP', createdAt: today(), pinned: true },
+  ],
+  tasks: [
+    { id: 't1', title: 'Call Dev about Diwali event', category: 'personal', dueDate: today(), status: 'todo', pinned: true, notes: '' },
+    { id: 't2', title: 'Finish wedding box lid design', category: 'kala', dueDate: today(), status: 'todo', pinned: false, notes: 'Purple with gold foil' },
+    { id: 't3', title: 'Order foam sheets 2"', category: 'mandir', dueDate: daysFrom(2), status: 'todo', pinned: false, notes: '' },
+    { id: 't4', title: 'Post Diwali flyer on Instagram', category: 'mandir', dueDate: daysFrom(1), status: 'done', pinned: false, notes: '' },
+    { id: 't5', title: 'Reply to Priya about custom frame', category: 'kala', dueDate: daysFrom(3), status: 'todo', pinned: false, notes: '' },
+  ],
+  orders: [
+    { id: 'o1', customer: 'Megha Patel', item: 'Wooden wedding box', source: 'Instagram DM', price: '85', dueDate: today(), stage: 'Finishing', notes: 'Purple velvet lining, gold initials MP' },
+    { id: 'o2', customer: 'Ravi & Sunita', item: 'Ganesh 3D print', source: 'Family', price: '45', dueDate: daysFrom(5), stage: 'Printing', notes: '6 inch, white PLA, matte finish' },
+    { id: 'o3', customer: 'Anita Sharma', item: 'Custom name frame', source: 'Friend', price: '30', dueDate: daysFrom(10), stage: 'Inquiry', notes: 'Modern font, black frame' },
+    { id: 'o4', customer: 'Temple Committee', item: 'Decorative arch panels x4', source: 'Mandir', price: '200', dueDate: daysFrom(14), stage: 'Designing', notes: 'Lotus motif, 3ft each' },
+  ],
+  builds: [
+    {
+      id: 'b1', event: 'Diwali 2026', buildName: 'Sinhasan (Main Throne)', section: 'Sanctum', status: 'Building',
+      date: '2026-10-20', people: 'Raj, Dev, Priya', notes: 'Gold + cream theme this year',
+      materials: 'Foam 2", Gold paint, Fabric, MDF board',
+      subtasks: [
+        { id: 's1', text: 'Finalize design sketch', done: true },
+        { id: 's2', text: 'Buy 2" foam sheets', done: true },
+        { id: 's3', text: 'Print decorative parts', done: false },
+        { id: 's4', text: 'Paint gold', done: false },
+        { id: 's5', text: 'Pack for transport', done: false },
+      ]
+    },
+    {
+      id: 'b2', event: 'Navratri 2026', buildName: 'Stage Backdrop', section: 'Hall', status: 'Planning',
+      date: '2026-10-02', people: 'Dev, Meena', notes: 'Large LED panel backdrop concept',
+      materials: 'PVC pipe, LED strips, fabric backdrop',
+      subtasks: [
+        { id: 's6', text: 'Get measurements from hall', done: false },
+        { id: 's7', text: 'Source LED strips', done: false },
+      ]
+    },
+    {
+      id: 'b3', event: 'Diwali 2026', buildName: 'Flower Arch Entry', section: 'Entrance', status: 'Idea',
+      date: '2026-10-20', people: '', notes: 'Marigold + purple artificial flowers',
+      materials: '',
+      subtasks: []
+    },
+  ]
+};
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+const Icon = ({ name, size = 20, color = 'currentColor' }) => {
+  const icons = {
+    today: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    inbox: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>,
+    box: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+    temple: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>,
+    plus: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+    pin: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+    check: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>,
+    search: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+    x: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+    edit: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+    trash: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>,
+    sun: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
+    moon: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>,
+    download: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+    upload: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+    arrow: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
+    chevron: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>,
+    tag: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+    people: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>,
+    package: <svg width={size} height={size} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+  };
+  return icons[name] || null;
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const uid = () => Math.random().toString(36).slice(2, 9);
+const catColor = { personal: 'var(--personal)', kala: 'var(--kala)', mandir: 'var(--mandir)', other: 'var(--other)' };
+const catLabel = { personal: 'Personal', kala: 'Kala', mandir: 'Mandir', other: 'Other' };
+const stageList = ['Inquiry','Designing','Printing','Finishing','Packing','Shipped','Delivered'];
+const buildStatus = ['Idea','Planning','Materials','Building','Ready','Done'];
+const stageColor = { Inquiry:'#8888a0', Designing:'#5b8cff', Printing:'#f4a14e', Finishing:'#c97cf4', Packing:'#d4a853', Shipped:'#3dd68c', Delivered:'#4ecda4' };
+const buildColor = { Idea:'#8888a0', Planning:'#5b8cff', Materials:'#f4a14e', Building:'#c97cf4', Ready:'#d4a853', Done:'#3dd68c' };
+const fmtDate = (d) => { if (!d) return ''; const dt = new Date(d + 'T00:00:00'); return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+const isToday = (d) => d === today();
+const isPast = (d) => d && d < today();
+
+// ─── Components ───────────────────────────────────────────────────────────────
+const Chip = ({ label, color, size = 'sm' }) => (
+  <span style={{
+    background: color + '22', color, border: `1px solid ${color}44`,
+    borderRadius: 100, padding: size === 'sm' ? '2px 8px' : '4px 12px',
+    fontSize: size === 'sm' ? 11 : 12, fontWeight: 600, whiteSpace: 'nowrap'
+  }}>{label}</span>
+);
+
+const Btn = ({ onClick, children, variant = 'primary', style: s = {}, disabled }) => {
+  const styles = {
+    primary: { background: 'var(--accent)', color: '#0f0f11', fontWeight: 700 },
+    secondary: { background: 'var(--surface2)', color: 'var(--text)', border: '1px solid var(--border)' },
+    ghost: { background: 'transparent', color: 'var(--text2)', border: '1px solid var(--border)' },
+    danger: { background: 'var(--danger)22', color: 'var(--danger)', border: '1px solid var(--danger)44' },
+  };
+  return (
+    <button onClick={onClick} disabled={disabled} style={{
+      ...styles[variant], padding: '10px 18px', borderRadius: var => '10px', border: 'none',
+      borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer', fontSize: 14, fontFamily: 'Sora',
+      display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', transition: 'opacity .15s',
+      opacity: disabled ? .4 : 1, ...s
+    }}>{children}</button>
+  );
+};
+
+const Modal = ({ title, onClose, children }) => (
+  <div onClick={onClose} style={{
+    position: 'fixed', inset: 0, background: '#000a', zIndex: 1000,
+    display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
+  }}>
+    <div onClick={e => e.stopPropagation()} style={{
+      background: 'var(--surface)', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 600,
+      maxHeight: '90vh', overflowY: 'auto', padding: '8px 0 40px'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px 12px' }}>
+        <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '-8px auto 8px', display: 'block' }}/>
+      </div>
+      <div style={{ width: 40, height: 4, background: 'var(--border)', borderRadius: 2, margin: '0 auto 20px' }}/>
+      <div style={{ padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700 }}>{title}</h2>
+        <button onClick={onClose} style={{ background: 'var(--surface2)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--text2)' }}>
+          <Icon name="x" size={18}/>
+        </button>
+      </div>
+      <div style={{ padding: '0 20px' }}>{children}</div>
+    </div>
+  </div>
+);
+
+const Field = ({ label, children }) => (
+  <div style={{ marginBottom: 16 }}>
+    <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '.5px', display: 'block', marginBottom: 6 }}>{label}</label>
+    {children}
+  </div>
+);
+
+const Input = ({ value, onChange, placeholder, type = 'text', rows }) => {
+  const style = {
+    width: '100%', background: 'var(--surface2)', border: '1.5px solid var(--border)',
+    borderRadius: 10, padding: '12px 14px', color: 'var(--text)', fontSize: 15,
+    outline: 'none', resize: 'vertical', fontFamily: 'Sora'
+  };
+  if (rows) return <textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} style={style}/>;
+  return <input type={type} value={value} onChange={onChange} placeholder={placeholder} style={style}/>;
+};
+
+// ─── TODAY TAB ────────────────────────────────────────────────────────────────
+function TodayTab({ tasks, setTasks, openAddTask }) {
+  const todayTasks = tasks.filter(t => t.status !== 'done' && (t.pinned || isToday(t.dueDate) || isPast(t.dueDate)));
+  const groups = ['personal','kala','mandir','other'];
+
+  const toggle = (id) => setTasks(ts => ts.map(t => t.id === id ? { ...t, status: t.status === 'done' ? 'todo' : 'done' } : t));
+  const togglePin = (id) => setTasks(ts => ts.map(t => t.id === id ? { ...t, pinned: !t.pinned } : t));
+
+  return (
+    <div style={{ padding: '0 16px 100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0 16px' }}>
+        <div>
+          <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 2 }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <h1 style={{ fontSize: 28, fontWeight: 700 }}>Today</h1>
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--text2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '6px 12px' }}>
+          {todayTasks.filter(t => t.status !== 'done').length} left
+        </div>
+      </div>
+
+      {todayTasks.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text2)' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>✨</div>
+          <p style={{ fontWeight: 600, marginBottom: 4 }}>All clear!</p>
+          <p style={{ fontSize: 14 }}>No tasks for today</p>
+        </div>
+      )}
+
+      {groups.map(cat => {
+        const items = todayTasks.filter(t => t.category === cat);
+        if (!items.length) return null;
+        return (
+          <div key={cat} style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: catColor[cat] }}/>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '.5px' }}>{catLabel[cat]}</span>
+            </div>
+            {items.map(task => (
+              <TaskCard key={task.id} task={task} onToggle={toggle} onPin={togglePin} setTasks={setTasks}/>
+            ))}
+          </div>
+        );
+      })}
+
+      <button onClick={openAddTask} style={{
+        position: 'fixed', bottom: 90, right: 20, width: 56, height: 56, borderRadius: '50%',
+        background: 'var(--accent)', border: 'none', color: '#0f0f11', cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 4px 20px rgba(212,168,83,.4)'
+      }}>
+        <Icon name="plus" size={24}/>
+      </button>
+    </div>
+  );
+}
+
+function TaskCard({ task, onToggle, onPin, setTasks }) {
+  const [expanded, setExpanded] = useState(false);
+  const done = task.status === 'done';
+  const overdue = isPast(task.dueDate) && !done;
+
+  return (
+    <div style={{
+      background: 'var(--surface)', border: `1px solid var(--border)`, borderRadius: 14, marginBottom: 10,
+      overflow: 'hidden', opacity: done ? .5 : 1, transition: 'opacity .2s',
+      borderLeft: `3px solid ${catColor[task.category]}`
+    }}>
+      <div style={{ padding: '14px 14px 14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        <button onClick={() => onToggle(task.id)} style={{
+          width: 24, height: 24, borderRadius: 6, border: done ? 'none' : '2px solid var(--border)',
+          background: done ? 'var(--success)' : 'transparent', flexShrink: 0, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 1
+        }}>
+          {done && <Icon name="check" size={14} color="#fff"/>}
+        </button>
+        <div style={{ flex: 1, minWidth: 0 }} onClick={() => setExpanded(!expanded)}>
+          <p style={{ fontWeight: 600, fontSize: 15, textDecoration: done ? 'line-through' : 'none', lineHeight: 1.4 }}>{task.title}</p>
+          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+            <Chip label={catLabel[task.category]} color={catColor[task.category]}/>
+            {task.dueDate && <Chip label={fmtDate(task.dueDate)} color={overdue ? 'var(--danger)' : 'var(--text2)'}/>}
+            {task.pinned && <Chip label="Pinned" color="var(--accent)"/>}
+          </div>
+        </div>
+        <button onClick={() => onPin(task.id)} style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+          color: task.pinned ? 'var(--accent)' : 'var(--text2)'
+        }}>
+          <Icon name="pin" size={16}/>
+        </button>
+      </div>
+      {expanded && task.notes && (
+        <div style={{ padding: '0 16px 14px', borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+          <p style={{ fontSize: 13, color: 'var(--text2)' }}>{task.notes}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── INBOX TAB ────────────────────────────────────────────────────────────────
+function InboxTab({ inbox, setInbox, tasks, setTasks }) {
+  const [text, setText] = useState('');
+  const inputRef = useRef();
+
+  const add = () => {
+    if (!text.trim()) return;
+    setInbox(items => [{ id: uid(), text: text.trim(), createdAt: today(), pinned: false }, ...items]);
+    setText('');
+  };
+
+  const categorize = (item, cat) => {
+    if (cat === 'done') {
+      setInbox(items => items.filter(i => i.id !== item.id));
+      return;
+    }
+    if (cat === 'later') {
+      setInbox(items => items.filter(i => i.id !== item.id));
+      setTasks(ts => [...ts, { id: uid(), title: item.text, category: 'other', dueDate: '', status: 'todo', pinned: false, notes: '' }]);
+      return;
+    }
+    setInbox(items => items.filter(i => i.id !== item.id));
+    setTasks(ts => [...ts, { id: uid(), title: item.text, category: cat, dueDate: today(), status: 'todo', pinned: false, notes: '' }]);
+  };
+
+  const remove = (id) => setInbox(items => items.filter(i => i.id !== id));
+  const togglePin = (id) => setInbox(items => items.map(i => i.id === id ? { ...i, pinned: !i.pinned } : i));
+
+  const sorted = [...inbox].sort((a, b) => b.pinned - a.pinned);
+
+  return (
+    <div style={{ padding: '0 16px 100px' }}>
+      <h1 style={{ fontSize: 28, fontWeight: 700, padding: '20px 0 16px' }}>Inbox</h1>
+
+      {/* Quick add */}
+      <div style={{ background: 'var(--surface)', border: '1.5px solid var(--accent)44', borderRadius: 16, padding: 14, marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <input
+            ref={inputRef}
+            value={text} onChange={e => setText(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && add()}
+            placeholder="Quick note... e.g. Call Dev"
+            style={{
+              flex: 1, background: 'transparent', border: 'none', color: 'var(--text)',
+              fontSize: 16, outline: 'none', fontFamily: 'Sora'
+            }}
+          />
+          <button onClick={add} disabled={!text.trim()} style={{
+            background: text.trim() ? 'var(--accent)' : 'var(--surface2)',
+            color: text.trim() ? '#0f0f11' : 'var(--text2)',
+            border: 'none', borderRadius: 10, padding: '0 16px', cursor: 'pointer',
+            fontWeight: 700, fontSize: 14, fontFamily: 'Sora', transition: 'all .2s'
+          }}>Add</button>
+        </div>
+        <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 8 }}>Tap a category button below each item to sort it</p>
+      </div>
+
+      {sorted.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text2)' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📬</div>
+          <p style={{ fontWeight: 600 }}>Inbox is empty</p>
+          <p style={{ fontSize: 14, marginTop: 4 }}>Add a quick note above</p>
+        </div>
+      )}
+
+      {sorted.map(item => (
+        <div key={item.id} style={{
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 14, marginBottom: 12,
+          borderLeft: item.pinned ? '3px solid var(--accent)' : '1px solid var(--border)'
+        }}>
+          <div style={{ padding: '14px 14px 10px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <p style={{ flex: 1, fontWeight: 500, fontSize: 15, lineHeight: 1.4 }}>{item.text}</p>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button onClick={() => togglePin(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: item.pinned ? 'var(--accent)' : 'var(--text2)', padding: 4 }}>
+                <Icon name="pin" size={15}/>
+              </button>
+              <button onClick={() => remove(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text2)', padding: 4 }}>
+                <Icon name="x" size={15}/>
+              </button>
+            </div>
+          </div>
+          <div style={{ padding: '0 14px 14px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {[
+              { key: 'personal', label: 'Personal', color: 'var(--personal)' },
+              { key: 'kala', label: 'Kala', color: 'var(--kala)' },
+              { key: 'mandir', label: 'Mandir', color: 'var(--mandir)' },
+              { key: 'later', label: 'Later', color: 'var(--text2)' },
+              { key: 'done', label: 'Done ✓', color: 'var(--success)' },
+            ].map(cat => (
+              <button key={cat.key} onClick={() => categorize(item, cat.key)} style={{
+                background: cat.color + '18', color: cat.color, border: `1px solid ${cat.color}44`,
+                borderRadius: 8, padding: '6px 12px', fontSize: 12, fontWeight: 600,
+                cursor: 'pointer', fontFamily: 'Sora'
+              }}>{cat.label}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── KALA ORDERS TAB ──────────────────────────────────────────────────────────
+function KalaTab({ orders, setOrders }) {
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [filter, setFilter] = useState('all');
+
+  const blank = { id: '', customer: '', item: '', source: 'Instagram DM', price: '', dueDate: '', stage: 'Inquiry', notes: '' };
+  const [form, setForm] = useState(blank);
+  const f = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }));
+
+  const openNew = () => { setForm({ ...blank, id: uid() }); setEditing(false); setShowModal(true); };
+  const openEdit = (o) => { setForm(o); setEditing(true); setShowModal(true); };
+  const save = () => {
+    if (!form.customer || !form.item) return;
+    if (editing) setOrders(os => os.map(o => o.id === form.id ? form : o));
+    else setOrders(os => [form, ...os]);
+    setShowModal(false);
+  };
+  const remove = (id) => { if (confirm('Delete order?')) setOrders(os => os.filter(o => o.id !== id)); };
+  const nextStage = (id) => setOrders(os => os.map(o => {
+    if (o.id !== id) return o;
+    const idx = stageList.indexOf(o.stage);
+    return idx < stageList.length - 1 ? { ...o, stage: stageList[idx + 1] } : o;
+  }));
+
+  const activeStages = ['Inquiry','Designing','Printing','Finishing','Packing'];
+  const filtered = filter === 'all' ? orders : filter === 'active' ? orders.filter(o => activeStages.includes(o.stage)) : orders.filter(o => ['Shipped','Delivered'].includes(o.stage));
+
+  return (
+    <div style={{ padding: '0 16px 100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0 16px' }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Kala Orders</h1>
+        <button onClick={openNew} style={{
+          background: 'var(--kala)', color: '#fff', border: 'none', borderRadius: 10,
+          padding: '10px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 14, fontFamily: 'Sora',
+          display: 'flex', alignItems: 'center', gap: 6
+        }}>
+          <Icon name="plus" size={16}/>New
+        </button>
+      </div>
+
+      {/* Filter */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+        {[['all','All'],['active','Active'],['done','Shipped']].map(([k,l]) => (
+          <button key={k} onClick={() => setFilter(k)} style={{
+            background: filter === k ? 'var(--kala)22' : 'var(--surface)',
+            color: filter === k ? 'var(--kala)' : 'var(--text2)',
+            border: `1px solid ${filter === k ? 'var(--kala)' : 'var(--border)'}`,
+            borderRadius: 10, padding: '8px 16px', cursor: 'pointer', fontSize: 13, fontWeight: 600, fontFamily: 'Sora'
+          }}>{l}</button>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text2)' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>📦</div>
+          <p style={{ fontWeight: 600 }}>No orders here</p>
+        </div>
+      )}
+
+      {filtered.map(order => (
+        <div key={order.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, marginBottom: 14, overflow: 'hidden' }}>
+          <div style={{ background: stageColor[order.stage] + '18', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
+            <Chip label={order.stage} color={stageColor[order.stage]}/>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {order.dueDate && <span style={{ fontSize: 12, color: isPast(order.dueDate) && !['Shipped','Delivered'].includes(order.stage) ? 'var(--danger)' : 'var(--text2)', fontWeight: 600 }}>Due {fmtDate(order.dueDate)}</span>}
+              <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 700 }}>{order.price ? `$${order.price}` : ''}</span>
+            </div>
+          </div>
+          <div style={{ padding: 16 }}>
+            <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 2 }}>{order.customer}</p>
+            <p style={{ fontSize: 14, color: 'var(--text2)', marginBottom: 8 }}>{order.item}</p>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: order.notes ? 10 : 0 }}>
+              <Chip label={order.source} color="var(--text2)"/>
+            </div>
+            {order.notes && <p style={{ fontSize: 13, color: 'var(--text2)', marginTop: 8, lineHeight: 1.5 }}>{order.notes}</p>}
+          </div>
+
+          {/* Stage progression */}
+          <div style={{ padding: '0 16px 12px' }}>
+            <div style={{ display: 'flex', gap: 4, overflowX: 'auto', paddingBottom: 2 }}>
+              {stageList.map((s, i) => {
+                const idx = stageList.indexOf(order.stage);
+                const isCurrent = s === order.stage;
+                const isPassed = i < idx;
+                return (
+                  <div key={s} style={{
+                    flex: '0 0 auto', padding: '5px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600,
+                    background: isCurrent ? stageColor[s] : isPassed ? stageColor[s] + '33' : 'var(--surface2)',
+                    color: isCurrent ? '#fff' : isPassed ? stageColor[s] : 'var(--text2)',
+                    whiteSpace: 'nowrap'
+                  }}>{s}</div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+            {order.stage !== 'Delivered' && (
+              <button onClick={() => nextStage(order.id)} style={{
+                flex: 1, background: 'var(--kala)22', color: 'var(--kala)', border: '1px solid var(--kala)44',
+                borderRadius: 10, padding: '10px', cursor: 'pointer', fontWeight: 700, fontSize: 13,
+                fontFamily: 'Sora', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+              }}>
+                <Icon name="arrow" size={14}/> Move to {stageList[stageList.indexOf(order.stage) + 1]}
+              </button>
+            )}
+            <button onClick={() => openEdit(order)} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', color: 'var(--text2)' }}>
+              <Icon name="edit" size={16}/>
+            </button>
+            <button onClick={() => remove(order.id)} style={{ background: 'var(--danger)11', border: '1px solid var(--danger)33', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', color: 'var(--danger)' }}>
+              <Icon name="trash" size={16}/>
+            </button>
+          </div>
+        </div>
+      ))}
+
+      {showModal && (
+        <Modal title={editing ? 'Edit Order' : 'New Order'} onClose={() => setShowModal(false)}>
+          <Field label="Customer Name"><Input value={form.customer} onChange={f('customer')} placeholder="e.g. Megha Patel"/></Field>
+          <Field label="Item"><Input value={form.item} onChange={f('item')} placeholder="e.g. Wedding box"/></Field>
+          <Field label="Source">
+            <select value={form.source} onChange={f('source')} style={{ width: '100%', background: 'var(--surface2)', border: '1.5px solid var(--border)', borderRadius: 10, padding: '12px 14px', color: 'var(--text)', fontSize: 15, fontFamily: 'Sora' }}>
+              {['Instagram DM','Family','Friend','Mandir','Website','Referral','Other'].map(s => <option key={s}>{s}</option>)}
+            </select>
+          </Field>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ flex: 1 }}><Field label="Price ($)"><Input value={form.price} onChange={f('price')} placeholder="0"/></Field></div>
+            <div style={{ flex: 1 }}><Field label="Due Date"><Input type="date" value={form.dueDate} onChange={f('dueDate')}/></Field></div>
+          </div>
+          <Field label="Stage">
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {stageList.map(s => (
+                <button key={s} onClick={() => setForm(x => ({ ...x, stage: s }))} style={{
+                  padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  background: form.stage === s ? stageColor[s] : 'var(--surface2)',
+                  color: form.stage === s ? '#fff' : 'var(--text2)',
+                  border: `1px solid ${form.stage === s ? stageColor[s] : 'var(--border)'}`,
+                  fontFamily: 'Sora'
+                }}>{s}</button>
+              ))}
+            </div>
+          </Field>
+          <Field label="Notes"><Input value={form.notes} onChange={f('notes')} placeholder="Any details..." rows={3}/></Field>
+          <Btn onClick={save} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>Save Order</Btn>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── MANDIR BUILDS TAB ───────────────────────────────────────────────────────
+function MandirTab({ builds, setBuilds }) {
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [expanded, setExpanded] = useState({});
+  const [filter, setFilter] = useState('all');
+
+  const blank = { id: '', event: '', buildName: '', section: '', status: 'Idea', date: '', people: '', notes: '', materials: '', subtasks: [] };
+  const [form, setForm] = useState(blank);
+  const f = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }));
+
+  const openNew = () => { setForm({ ...blank, id: uid() }); setEditing(false); setShowModal(true); };
+  const openEdit = (b) => { setForm(b); setEditing(true); setShowModal(true); };
+  const saveBuild = () => {
+    if (!form.buildName) return;
+    if (editing) setBuilds(bs => bs.map(b => b.id === form.id ? form : b));
+    else setBuilds(bs => [form, ...bs]);
+    setShowModal(false);
+  };
+  const remove = (id) => { if (confirm('Delete this build?')) setBuilds(bs => bs.filter(b => b.id !== id)); };
+  const advanceStatus = (id) => setBuilds(bs => bs.map(b => {
+    if (b.id !== id) return b;
+    const idx = buildStatus.indexOf(b.status);
+    return idx < buildStatus.length - 1 ? { ...b, status: buildStatus[idx + 1] } : b;
+  }));
+  const toggleSub = (buildId, subId) => setBuilds(bs => bs.map(b => b.id !== buildId ? b : { ...b, subtasks: b.subtasks.map(s => s.id === subId ? { ...s, done: !s.done } : s) }));
+  const addSub = (buildId, text) => setBuilds(bs => bs.map(b => b.id !== buildId ? b : { ...b, subtasks: [...b.subtasks, { id: uid(), text, done: false }] }));
+  const removeSub = (buildId, subId) => setBuilds(bs => bs.map(b => b.id !== buildId ? b : { ...b, subtasks: b.subtasks.filter(s => s.id !== subId) }));
+
+  const filtered = filter === 'all' ? builds : builds.filter(b => b.status === filter);
+  const events = [...new Set(builds.map(b => b.event).filter(Boolean))];
+
+  return (
+    <div style={{ padding: '0 16px 100px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 0 16px' }}>
+        <h1 style={{ fontSize: 28, fontWeight: 700 }}>Mandir Builds</h1>
+        <button onClick={openNew} style={{
+          background: 'var(--mandir)', color: '#fff', border: 'none', borderRadius: 10,
+          padding: '10px 16px', cursor: 'pointer', fontWeight: 700, fontSize: 14, fontFamily: 'Sora',
+          display: 'flex', alignItems: 'center', gap: 6
+        }}>
+          <Icon name="plus" size={16}/>New
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, overflowX: 'auto', paddingBottom: 4 }}>
+        {[['all','All'], ...buildStatus.map(s => [s, s])].map(([k, l]) => (
+          <button key={k} onClick={() => setFilter(k)} style={{
+            background: filter === k ? buildColor[k] + '22' || 'var(--mandir)22' : 'var(--surface)',
+            color: filter === k ? buildColor[k] || 'var(--mandir)' : 'var(--text2)',
+            border: `1px solid ${filter === k ? buildColor[k] || 'var(--mandir)' : 'var(--border)'}`,
+            borderRadius: 10, padding: '8px 14px', cursor: 'pointer', fontSize: 12, fontWeight: 600,
+            fontFamily: 'Sora', whiteSpace: 'nowrap', flexShrink: 0
+          }}>{l}</button>
+        ))}
+      </div>
+
+      {filtered.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text2)' }}>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>🛕</div>
+          <p style={{ fontWeight: 600 }}>No builds yet</p>
+        </div>
+      )}
+
+      {filtered.map(build => (
+        <BuildCard
+          key={build.id} build={build}
+          expanded={expanded[build.id]} setExpanded={() => setExpanded(e => ({ ...e, [build.id]: !e[build.id] }))}
+          onAdvance={() => advanceStatus(build.id)}
+          onEdit={() => openEdit(build)}
+          onDelete={() => remove(build.id)}
+          onToggleSub={(sid) => toggleSub(build.id, sid)}
+          onAddSub={(text) => addSub(build.id, text)}
+          onRemoveSub={(sid) => removeSub(build.id, sid)}
+        />
+      ))}
+
+      {showModal && (
+        <Modal title={editing ? 'Edit Build' : 'New Build'} onClose={() => setShowModal(false)}>
+          <Field label="Event Name"><Input value={form.event} onChange={f('event')} placeholder="e.g. Diwali 2026"/></Field>
+          <Field label="Build Name"><Input value={form.buildName} onChange={f('buildName')} placeholder="e.g. Sinhasan"/></Field>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ flex: 1 }}><Field label="Section"><Input value={form.section} onChange={f('section')} placeholder="e.g. Sanctum"/></Field></div>
+            <div style={{ flex: 1 }}><Field label="Date"><Input type="date" value={form.date} onChange={f('date')}/></Field></div>
+          </div>
+          <Field label="Status">
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {buildStatus.map(s => (
+                <button key={s} onClick={() => setForm(x => ({ ...x, status: s }))} style={{
+                  padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                  background: form.status === s ? buildColor[s] : 'var(--surface2)',
+                  color: form.status === s ? '#fff' : 'var(--text2)',
+                  border: `1px solid ${form.status === s ? buildColor[s] : 'var(--border)'}`,
+                  fontFamily: 'Sora'
+                }}>{s}</button>
+              ))}
+            </div>
+          </Field>
+          <Field label="People Assigned"><Input value={form.people} onChange={f('people')} placeholder="e.g. Raj, Dev, Priya"/></Field>
+          <Field label="Materials Needed"><Input value={form.materials} onChange={f('materials')} placeholder="e.g. Foam 2in, Gold paint..."/></Field>
+          <Field label="Notes"><Input value={form.notes} onChange={f('notes')} placeholder="Details..." rows={3}/></Field>
+          <Btn onClick={saveBuild} style={{ width: '100%', justifyContent: 'center', marginTop: 8 }}>Save Build</Btn>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+function BuildCard({ build, expanded, setExpanded, onAdvance, onEdit, onDelete, onToggleSub, onAddSub, onRemoveSub }) {
+  const [newSub, setNewSub] = useState('');
+  const doneCount = build.subtasks.filter(s => s.done).length;
+  const pct = build.subtasks.length ? Math.round(doneCount / build.subtasks.length * 100) : 0;
+
+  const handleAddSub = () => {
+    if (!newSub.trim()) return;
+    onAddSub(newSub.trim());
+    setNewSub('');
+  };
+
+  return (
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 16, marginBottom: 14, overflow: 'hidden', borderLeft: `3px solid ${buildColor[build.status]}` }}>
+      <div style={{ padding: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 11, color: 'var(--mandir)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 2 }}>{build.event}</p>
+            <p style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>{build.buildName}</p>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <Chip label={build.status} color={buildColor[build.status]}/>
+              {build.section && <Chip label={build.section} color="var(--text2)"/>}
+              {build.date && <Chip label={fmtDate(build.date)} color="var(--text2)"/>}
+            </div>
+          </div>
+          <button onClick={setExpanded} style={{ background: 'var(--surface2)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: 'var(--text2)', marginLeft: 8, flexShrink: 0 }}>
+            <Icon name="chevron" size={16}/>
+          </button>
+        </div>
+
+        {build.subtasks.length > 0 && (
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: 'var(--text2)', marginBottom: 4 }}>
+              <span>{doneCount}/{build.subtasks.length} subtasks</span>
+              <span style={{ color: 'var(--mandir)', fontWeight: 700 }}>{pct}%</span>
+            </div>
+            <div style={{ height: 4, background: 'var(--surface2)', borderRadius: 2 }}>
+              <div style={{ height: 4, background: buildColor[build.status], borderRadius: 2, width: pct + '%', transition: 'width .3s' }}/>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {expanded && (
+        <div style={{ borderTop: '1px solid var(--border)', padding: 16 }}>
+          {build.people && (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, color: 'var(--text2)', fontSize: 13 }}>
+              <Icon name="people" size={14}/> {build.people}
+            </div>
+          )}
+          {build.materials && (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 10, color: 'var(--text2)', fontSize: 13 }}>
+              <Icon name="package" size={14}/> <span>{build.materials}</span>
+            </div>
+          )}
+          {build.notes && <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 12, lineHeight: 1.5 }}>{build.notes}</p>}
+
+          {/* Subtasks */}
+          <div style={{ marginBottom: 10 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>Subtasks</p>
+            {build.subtasks.map(s => (
+              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                <button onClick={() => onToggleSub(s.id)} style={{
+                  width: 20, height: 20, borderRadius: 5, border: s.done ? 'none' : '2px solid var(--border)',
+                  background: s.done ? buildColor[build.status] : 'transparent', flexShrink: 0,
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}>
+                  {s.done && <Icon name="check" size={12} color="#fff"/>}
+                </button>
+                <span style={{ flex: 1, fontSize: 14, textDecoration: s.done ? 'line-through' : 'none', color: s.done ? 'var(--text2)' : 'var(--text)' }}>{s.text}</span>
+                <button onClick={() => onRemoveSub(s.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text2)', padding: 2 }}>
+                  <Icon name="x" size={12}/>
+                </button>
+              </div>
+            ))}
+            <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+              <input value={newSub} onChange={e => setNewSub(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleAddSub()}
+                placeholder="Add subtask..." style={{
+                  flex: 1, background: 'var(--surface2)', border: '1px solid var(--border)',
+                  borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 14, fontFamily: 'Sora'
+                }}/>
+              <button onClick={handleAddSub} style={{ background: 'var(--mandir)22', color: 'var(--mandir)', border: '1px solid var(--mandir)44', borderRadius: 8, padding: '0 12px', cursor: 'pointer', fontFamily: 'Sora', fontWeight: 700, fontSize: 13 }}>Add</button>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            {build.status !== 'Done' && (
+              <button onClick={onAdvance} style={{
+                flex: 1, background: 'var(--mandir)22', color: 'var(--mandir)', border: '1px solid var(--mandir)44',
+                borderRadius: 10, padding: 10, cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'Sora',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+              }}>
+                <Icon name="arrow" size={14}/> {buildStatus[buildStatus.indexOf(build.status) + 1]}
+              </button>
+            )}
+            <button onClick={onEdit} style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', color: 'var(--text2)' }}>
+              <Icon name="edit" size={16}/>
+            </button>
+            <button onClick={onDelete} style={{ background: 'var(--danger)11', border: '1px solid var(--danger)33', borderRadius: 10, padding: '10px 14px', cursor: 'pointer', color: 'var(--danger)' }}>
+              <Icon name="trash" size={16}/>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SEARCH ───────────────────────────────────────────────────────────────────
+function SearchView({ tasks, orders, builds, inbox, onClose }) {
+  const [q, setQ] = useState('');
+  const ql = q.toLowerCase();
+  if (!ql.trim()) return (
+    <div style={{ padding: '20px 16px' }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 24 }}>
+        <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search everything..."
+          style={{ flex: 1, background: 'var(--surface)', border: '1.5px solid var(--accent)', borderRadius: 12, padding: '12px 16px', color: 'var(--text)', fontSize: 16, fontFamily: 'Sora' }}/>
+        <button onClick={onClose} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px', cursor: 'pointer', color: 'var(--text2)', fontFamily: 'Sora', fontSize: 14 }}>Cancel</button>
+      </div>
+      <p style={{ color: 'var(--text2)', textAlign: 'center', marginTop: 40 }}>Start typing to search tasks, orders, builds...</p>
+    </div>
+  );
+
+  const matchTasks = tasks.filter(t => t.title.toLowerCase().includes(ql) || t.notes?.toLowerCase().includes(ql));
+  const matchOrders = orders.filter(o => o.customer.toLowerCase().includes(ql) || o.item.toLowerCase().includes(ql) || o.notes?.toLowerCase().includes(ql));
+  const matchBuilds = builds.filter(b => b.buildName.toLowerCase().includes(ql) || b.event.toLowerCase().includes(ql) || b.notes?.toLowerCase().includes(ql));
+  const matchInbox = inbox.filter(i => i.text.toLowerCase().includes(ql));
+  const total = matchTasks.length + matchOrders.length + matchBuilds.length + matchInbox.length;
+
+  return (
+    <div style={{ padding: '20px 16px 100px' }}>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+        <input autoFocus value={q} onChange={e => setQ(e.target.value)} placeholder="Search everything..."
+          style={{ flex: 1, background: 'var(--surface)', border: '1.5px solid var(--accent)', borderRadius: 12, padding: '12px 16px', color: 'var(--text)', fontSize: 16, fontFamily: 'Sora' }}/>
+        <button onClick={onClose} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 16px', cursor: 'pointer', color: 'var(--text2)', fontFamily: 'Sora', fontSize: 14 }}>Cancel</button>
+      </div>
+      <p style={{ fontSize: 13, color: 'var(--text2)', marginBottom: 16 }}>{total} result{total !== 1 ? 's' : ''}</p>
+
+      {matchTasks.length > 0 && <Section label="Tasks">{matchTasks.map(t => <Row key={t.id} title={t.title} sub={catLabel[t.category]} chip={<Chip label={t.status} color="var(--text2)"/>}/>)}</Section>}
+      {matchOrders.length > 0 && <Section label="Orders">{matchOrders.map(o => <Row key={o.id} title={o.customer} sub={o.item} chip={<Chip label={o.stage} color={stageColor[o.stage]}/>}/>)}</Section>}
+      {matchBuilds.length > 0 && <Section label="Builds">{matchBuilds.map(b => <Row key={b.id} title={b.buildName} sub={b.event} chip={<Chip label={b.status} color={buildColor[b.status]}/>}/>)}</Section>}
+      {matchInbox.length > 0 && <Section label="Inbox">{matchInbox.map(i => <Row key={i.id} title={i.text} sub="Inbox"/>)}</Section>}
+      {total === 0 && <p style={{ textAlign: 'center', color: 'var(--text2)', marginTop: 40 }}>Nothing found for "{q}"</p>}
+    </div>
+  );
+}
+const Section = ({ label, children }) => <div style={{ marginBottom: 20 }}><p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 8 }}>{label}</p>{children}</div>;
+const Row = ({ title, sub, chip }) => <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '12px 14px', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+  <div><p style={{ fontWeight: 600, fontSize: 14 }}>{title}</p>{sub && <p style={{ fontSize: 12, color: 'var(--text2)', marginTop: 2 }}>{sub}</p>}</div>
+  {chip}
+</div>;
+
+// ─── ADD TASK MODAL ───────────────────────────────────────────────────────────
+function AddTaskModal({ onSave, onClose }) {
+  const [form, setForm] = useState({ title: '', category: 'personal', dueDate: today(), notes: '', pinned: false });
+  const f = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }));
+  const save = () => { if (!form.title.trim()) return; onSave({ ...form, id: uid(), status: 'todo' }); onClose(); };
+  return (
+    <Modal title="New Task" onClose={onClose}>
+      <Field label="Task"><Input value={form.title} onChange={f('title')} placeholder="What needs to be done?"/></Field>
+      <Field label="Category">
+        <div style={{ display: 'flex', gap: 8 }}>
+          {Object.entries(catLabel).map(([k, l]) => (
+            <button key={k} onClick={() => setForm(x => ({ ...x, category: k }))} style={{
+              flex: 1, padding: '10px 6px', borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              background: form.category === k ? catColor[k] + '33' : 'var(--surface2)',
+              color: form.category === k ? catColor[k] : 'var(--text2)',
+              border: `1px solid ${form.category === k ? catColor[k] : 'var(--border)'}`,
+              fontFamily: 'Sora'
+            }}>{l}</button>
+          ))}
+        </div>
+      </Field>
+      <Field label="Due Date"><Input type="date" value={form.dueDate} onChange={f('dueDate')}/></Field>
+      <Field label="Notes"><Input value={form.notes} onChange={f('notes')} placeholder="Optional notes..." rows={2}/></Field>
+      <Btn onClick={save} style={{ width: '100%', justifyContent: 'center' }}>Add Task</Btn>
+    </Modal>
+  );
+}
+
+// ─── SETTINGS MODAL ───────────────────────────────────────────────────────────
+function SettingsModal({ onClose, onExport, onImport, darkMode, setDarkMode }) {
+  const fileRef = useRef();
+  return (
+    <Modal title="Settings" onClose={onClose}>
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12 }}>Appearance</p>
+        <button onClick={() => setDarkMode(!darkMode)} style={{
+          width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12,
+          padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          cursor: 'pointer', color: 'var(--text)', fontFamily: 'Sora', fontSize: 15
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Icon name={darkMode ? 'moon' : 'sun'} size={18}/> {darkMode ? 'Dark Mode' : 'Light Mode'}
+          </span>
+          <span style={{ fontSize: 12, color: 'var(--text2)' }}>Tap to toggle</span>
+        </button>
+      </div>
+
+      <div style={{ marginBottom: 20 }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '.5px', marginBottom: 12 }}>Data</p>
+        <button onClick={onExport} style={{
+          width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12,
+          padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10,
+          cursor: 'pointer', color: 'var(--text)', fontFamily: 'Sora', fontSize: 15, marginBottom: 10
+        }}>
+          <Icon name="download" size={18}/> Export JSON Backup
+        </button>
+        <button onClick={() => fileRef.current.click()} style={{
+          width: '100%', background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12,
+          padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 10,
+          cursor: 'pointer', color: 'var(--text)', fontFamily: 'Sora', fontSize: 15
+        }}>
+          <Icon name="upload" size={18}/> Import JSON Backup
+        </button>
+        <input ref={fileRef} type="file" accept=".json" style={{ display: 'none' }} onChange={onImport}/>
+      </div>
+
+      <div style={{ background: 'var(--surface2)', border: '1px solid var(--border)', borderRadius: 12, padding: 14 }}>
+        <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>📱 Install as App</p>
+        <p style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.6 }}>
+          In Safari: tap <strong style={{ color: 'var(--text)' }}>Share</strong> → <strong style={{ color: 'var(--text)' }}>Add to Home Screen</strong> to install this as a full-screen app on your iPhone.
+        </p>
+      </div>
+    </Modal>
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+function App() {
+  const [darkMode, setDarkMode] = useState(true);
+  const [tab, setTab] = useState('today');
+  const [searching, setSearching] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showAddTask, setShowAddTask] = useState(false);
+
+  const [data, setDataRaw] = useState(() => {
+    const saved = load();
+    return saved || SAMPLE;
+  });
+
+  const setData = (fn) => setDataRaw(prev => { const next = typeof fn === 'function' ? fn(prev) : fn; save(next); return next; });
+  const setInbox = (fn) => setData(d => ({ ...d, inbox: typeof fn === 'function' ? fn(d.inbox) : fn }));
+  const setTasks = (fn) => setData(d => ({ ...d, tasks: typeof fn === 'function' ? fn(d.tasks) : fn }));
+  const setOrders = (fn) => setData(d => ({ ...d, orders: typeof fn === 'function' ? fn(d.orders) : fn }));
+  const setBuilds = (fn) => setData(d => ({ ...d, builds: typeof fn === 'function' ? fn(d.builds) : fn }));
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-light', darkMode ? null : '');
+    if (!darkMode) document.documentElement.setAttribute('data-light', '');
+    else document.documentElement.removeAttribute('data-light');
+  }, [darkMode]);
+
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `lifedash-backup-${today()}.json`; a.click();
+  };
+
+  const importData = (e) => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => { try { const parsed = JSON.parse(ev.target.result); setData(parsed); alert('Data imported!'); setShowSettings(false); } catch { alert('Invalid file'); } };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const tabs = [
+    { id: 'today', label: 'Today', icon: 'today' },
+    { id: 'inbox', label: 'Inbox', icon: 'inbox', badge: data.inbox.length },
+    { id: 'kala', label: 'Kala', icon: 'box' },
+    { id: 'mandir', label: 'Mandir', icon: 'temple' },
+  ];
+
+  return (
+    <div style={{ maxWidth: 600, margin: '0 auto', minHeight: '100vh', position: 'relative' }}>
+      {/* Header */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 100, background: 'var(--bg)',
+        borderBottom: '1px solid var(--border)', padding: '12px 16px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        backdropFilter: 'blur(20px)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 20 }}>🌟</span>
+          <span style={{ fontWeight: 700, fontSize: 17 }}>Life Dashboard</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => setSearching(true)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', cursor: 'pointer', color: 'var(--text2)' }}>
+            <Icon name="search" size={18}/>
+          </button>
+          <button onClick={() => setShowSettings(true)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '8px 10px', cursor: 'pointer', color: 'var(--text2)', fontSize: 16 }}>
+            ⚙️
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      {searching ? (
+        <SearchView tasks={data.tasks} orders={data.orders} builds={data.builds} inbox={data.inbox} onClose={() => setSearching(false)}/>
+      ) : tab === 'today' ? (
+        <TodayTab tasks={data.tasks} setTasks={setTasks} openAddTask={() => setShowAddTask(true)}/>
+      ) : tab === 'inbox' ? (
+        <InboxTab inbox={data.inbox} setInbox={setInbox} tasks={data.tasks} setTasks={setTasks}/>
+      ) : tab === 'kala' ? (
+        <KalaTab orders={data.orders} setOrders={setOrders}/>
+      ) : tab === 'mandir' ? (
+        <MandirTab builds={data.builds} setBuilds={setBuilds}/>
+      ) : null}
+
+      {/* Bottom Nav */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+        width: '100%', maxWidth: 600, background: 'var(--bg)', borderTop: '1px solid var(--border)',
+        display: 'flex', paddingBottom: 'env(safe-area-inset-bottom)',
+        backdropFilter: 'blur(20px)', zIndex: 99
+      }}>
+        {tabs.map(t => {
+          const active = tab === t.id && !searching;
+          const tabAccent = { today: 'var(--accent)', inbox: 'var(--personal)', kala: 'var(--kala)', mandir: 'var(--mandir)' };
+          return (
+            <button key={t.id} onClick={() => { setTab(t.id); setSearching(false); }} style={{
+              flex: 1, padding: '10px 0 8px', background: 'none', border: 'none',
+              color: active ? tabAccent[t.id] : 'var(--text2)',
+              cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+              position: 'relative'
+            }}>
+              <Icon name={t.icon} size={22} color={active ? tabAccent[t.id] : 'var(--text2)'}/>
+              <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, fontFamily: 'Sora' }}>{t.label}</span>
+              {t.badge > 0 && (
+                <span style={{
+                  position: 'absolute', top: 6, right: 'calc(50% - 16px)',
+                  background: 'var(--personal)', color: '#fff', borderRadius: 100,
+                  fontSize: 9, fontWeight: 700, padding: '1px 5px', minWidth: 16, textAlign: 'center'
+                }}>{t.badge}</span>
+              )}
+              {active && <div style={{ position: 'absolute', bottom: 0, width: 24, height: 2, background: tabAccent[t.id], borderRadius: 1 }}/>}
+            </button>
+          );
+        })}
+      </div>
+
+      {showAddTask && (
+        <AddTaskModal onSave={(task) => setTasks(ts => [...ts, task])} onClose={() => setShowAddTask(false)}/>
+      )}
+
+      {showSettings && (
+        <SettingsModal onClose={() => setShowSettings(false)} onExport={exportData} onImport={importData} darkMode={darkMode} setDarkMode={setDarkMode}/>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+
+<!-- PWA Manifest inline -->
+<script>
+const manifest = {
+  name: "Life Dashboard",
+  short_name: "LifeDash",
+  description: "Personal life organizer - tasks, orders, builds",
+  start_url: ".",
+  display: "standalone",
+  background_color: "#0f0f11",
+  theme_color: "#0f0f11",
+  orientation: "portrait",
+  icons: [
+    { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230f0f11' rx='80'/%3E%3Ctext x='256' y='340' font-size='260' text-anchor='middle'%3E🌟%3C/text%3E%3C/svg%3E", sizes: "512x512", type: "image/svg+xml" }
+  ]
+};
+const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const link = document.createElement('link');
+link.rel = 'manifest'; link.href = url;
+document.head.appendChild(link);
+</script>
+</body>
+</html>
