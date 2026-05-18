@@ -1,16 +1,18 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Life Dashboard"/>
 <meta name="theme-color" content="#0f0f11"/>
 <title>Life Dashboard</title>
+
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
 <style>
 :root{
 --bg:#0f0f11;
@@ -26,57 +28,98 @@
 --green:#3dd68c;
 --red:#ff5f6d;
 }
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+-webkit-tap-highlight-color:transparent;
+}
+
+html{
+margin:0;
+padding:0;
+background:var(--bg);
+}
+
 body{
+margin:0;
+padding:0;
 background:var(--bg);
 color:var(--text);
 font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
 min-height:100vh;
+min-height:100dvh;
+overflow-x:hidden;
 }
+
 button,input,textarea,select{
 font-family:inherit;
 font-size:16px;
 }
-button{cursor:pointer}
+
+button{
+cursor:pointer;
+}
+
 .app{
 max-width:620px;
 margin:0 auto;
 min-height:100vh;
-padding-bottom:86px;
+min-height:100dvh;
+padding-bottom:calc(92px + env(safe-area-inset-bottom));
 }
+
 .header{
 position:sticky;
 top:0;
-z-index:20;
-background:rgba(15,15,17,.95);
-backdrop-filter:blur(16px);
+z-index:200;
+background:rgba(15,15,17,.96);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
 border-bottom:1px solid var(--border);
-padding:14px 16px;
+padding-top:calc(env(safe-area-inset-top) + 18px);
+padding-left:16px;
+padding-right:16px;
+padding-bottom:14px;
 display:flex;
 align-items:center;
 justify-content:space-between;
+min-height:92px;
+box-sizing:border-box;
 }
+
 .brand{
-font-weight:800;
+font-weight:900;
 font-size:18px;
+line-height:1.2;
 }
-.headerBtns{display:flex;gap:8px}
+
+.headerBtns{
+display:flex;
+gap:8px;
+align-items:center;
+}
+
 .iconBtn{
 background:var(--card);
 color:var(--text);
 border:1px solid var(--border);
 border-radius:10px;
 padding:8px 11px;
-font-weight:700;
+font-weight:800;
 }
+
 .page{
 padding:18px 16px;
 }
+
 .pageTitle{
 font-size:30px;
-font-weight:800;
+font-weight:900;
 margin-bottom:16px;
 }
+
 .card{
 background:var(--card);
 border:1px solid var(--border);
@@ -84,68 +127,83 @@ border-radius:16px;
 padding:14px;
 margin-bottom:12px;
 }
+
 .sectionTitle{
 font-size:12px;
-font-weight:800;
+font-weight:900;
 color:var(--muted);
 text-transform:uppercase;
 letter-spacing:.7px;
 margin:22px 0 10px;
 }
+
 .row{
 display:flex;
 gap:10px;
 align-items:flex-start;
 }
-.grow{flex:1;min-width:0}
+
+.grow{
+flex:1;
+min-width:0;
+}
+
 .title{
-font-weight:700;
+font-weight:800;
 font-size:15px;
 line-height:1.35;
 }
+
 .sub{
 color:var(--muted);
 font-size:13px;
 line-height:1.4;
 margin-top:4px;
 }
+
 .chips{
 display:flex;
 gap:6px;
 flex-wrap:wrap;
 margin-top:8px;
 }
+
 .chip{
 font-size:11px;
-font-weight:700;
+font-weight:800;
 border-radius:999px;
 padding:4px 8px;
 background:var(--card2);
 color:var(--muted);
 border:1px solid var(--border);
 }
+
 .btn{
 border:none;
 border-radius:10px;
 padding:10px 14px;
-font-weight:800;
+font-weight:900;
 background:var(--gold);
 color:#111;
 }
+
 .btn.secondary{
 background:var(--card2);
 color:var(--text);
 border:1px solid var(--border);
 }
+
 .btn.danger{
 background:rgba(255,95,109,.15);
 color:var(--red);
 border:1px solid rgba(255,95,109,.35);
 }
+
 .btn.small{
 font-size:13px;
 padding:7px 10px;
 }
+
 .input{
 width:100%;
 background:var(--card2);
@@ -155,17 +213,26 @@ border-radius:12px;
 padding:12px;
 outline:none;
 }
-textarea.input{min-height:82px;resize:vertical}
-.field{margin-bottom:13px}
+
+textarea.input{
+min-height:82px;
+resize:vertical;
+}
+
+.field{
+margin-bottom:13px;
+}
+
 .label{
 display:block;
 font-size:12px;
-font-weight:800;
+font-weight:900;
 color:var(--muted);
 text-transform:uppercase;
 letter-spacing:.6px;
 margin-bottom:6px;
 }
+
 .checkbox{
 width:24px;
 height:24px;
@@ -179,30 +246,35 @@ justify-content:center;
 flex-shrink:0;
 font-weight:900;
 }
+
 .checkbox.done{
 background:var(--green);
 border-color:var(--green);
 }
+
 .actions{
 display:flex;
 gap:8px;
 flex-wrap:wrap;
 margin-top:12px;
 }
+
 .bottomNav{
 position:fixed;
 bottom:0;
 left:50%;
 transform:translateX(-50%);
-z-index:30;
+z-index:300;
 width:100%;
 max-width:620px;
 background:rgba(15,15,17,.97);
-backdrop-filter:blur(16px);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
 border-top:1px solid var(--border);
 display:flex;
 padding-bottom:env(safe-area-inset-bottom);
 }
+
 .navBtn{
 flex:1;
 border:0;
@@ -210,10 +282,19 @@ background:transparent;
 color:var(--muted);
 padding:10px 0 8px;
 font-size:11px;
-font-weight:700;
+font-weight:800;
 }
-.navBtn.active{color:var(--gold)}
-.navIcon{font-size:19px;display:block;margin-bottom:3px}
+
+.navBtn.active{
+color:var(--gold);
+}
+
+.navIcon{
+font-size:19px;
+display:block;
+margin-bottom:3px;
+}
+
 .quick{
 background:var(--card);
 border:1px solid rgba(212,168,83,.5);
@@ -221,18 +302,21 @@ border-radius:16px;
 padding:14px;
 margin-bottom:16px;
 }
+
 .quickRow{
 display:flex;
 gap:8px;
 }
+
 .modalBg{
 position:fixed;
 inset:0;
 background:rgba(0,0,0,.72);
-z-index:100;
+z-index:1000;
 display:flex;
 align-items:flex-end;
 }
+
 .modal{
 width:100%;
 max-width:620px;
@@ -241,18 +325,21 @@ background:var(--card);
 border-radius:20px 20px 0 0;
 max-height:90vh;
 overflow:auto;
-padding:18px 16px 34px;
+padding:18px 16px calc(34px + env(safe-area-inset-bottom));
 }
+
 .modalTop{
 display:flex;
 justify-content:space-between;
 align-items:center;
 margin-bottom:16px;
 }
+
 .modalTitle{
 font-size:21px;
 font-weight:900;
 }
+
 .progress{
 height:5px;
 background:var(--card2);
@@ -260,10 +347,12 @@ border-radius:99px;
 overflow:hidden;
 margin-top:10px;
 }
+
 .progressFill{
 height:100%;
 background:var(--orange);
 }
+
 .stageLine{
 display:flex;
 gap:5px;
@@ -271,30 +360,34 @@ overflow-x:auto;
 padding-bottom:3px;
 margin-top:10px;
 }
+
 .stagePill{
 font-size:10px;
-font-weight:800;
+font-weight:900;
 border-radius:8px;
 padding:5px 8px;
 background:var(--card2);
 color:var(--muted);
 white-space:nowrap;
 }
+
 .stagePill.active{
 background:var(--purple);
 color:white;
 }
+
 .empty{
 text-align:center;
 color:var(--muted);
 padding:50px 10px;
 }
+
 .undo{
 position:fixed;
 left:16px;
 right:16px;
-bottom:88px;
-z-index:80;
+bottom:calc(88px + env(safe-area-inset-bottom));
+z-index:800;
 max-width:590px;
 margin:0 auto;
 background:var(--card2);
@@ -308,23 +401,31 @@ box-shadow:0 8px 30px rgba(0,0,0,.4);
 }
 </style>
 </head>
+
 <body>
 <div id="root"></div>
+
 <script type="text/babel">
 const {useState,useEffect}=React;
-const KEY="life_dashboard_clean_v1";
+
+const KEY="life_dashboard_full_v2";
+
 const today=()=>new Date().toISOString().split("T")[0];
+
 const daysFrom=(n)=>{
 const d=new Date();
 d.setDate(d.getDate()+n);
 return d.toISOString().split("T")[0];
 };
+
 const fmt=(date)=>{
 if(!date)return"";
 const d=new Date(date+"T00:00:00");
 return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
 };
+
 const uid=()=>Math.random().toString(36).slice(2,10);
+
 const load=()=>{
 try{
 return JSON.parse(localStorage.getItem(KEY))||null;
@@ -332,9 +433,11 @@ return JSON.parse(localStorage.getItem(KEY))||null;
 return null;
 }
 };
+
 const save=(data)=>{
 localStorage.setItem(KEY,JSON.stringify(data));
 };
+
 const SAMPLE={
 inbox:[
 {id:"i1",text:"Call Dev about Diwali meeting",createdAt:today(),pinned:false},
@@ -359,17 +462,21 @@ builds:[
 {id:"b2",event:"Navratri 2026",buildName:"Stage backdrop",section:"Hall",status:"Planning",date:daysFrom(12),people:"",materials:"PVC, fabric",notes:"",subtasks:[]}
 ]
 };
+
 const taskColors={
 Personal:"var(--blue)",
 Kala:"var(--purple)",
 Mandir:"var(--orange)",
 Other:"var(--green)"
 };
+
 const orderStages=["Inquiry","Designing","Printing","Finishing","Packing","Shipped","Delivered"];
 const buildStages=["Idea","Planning","Materials","Building","Ready","Done"];
+
 function Chip({children,color}){
 return <span className="chip" style={{color:color||"var(--muted)"}}>{children}</span>;
 }
+
 function Modal({title,onClose,children}){
 return(
 <div className="modalBg" onClick={onClose}>
@@ -383,15 +490,19 @@ return(
 </div>
 );
 }
+
 function Field({label,children}){
 return <div className="field"><label className="label">{label}</label>{children}</div>;
 }
+
 function Input(props){
 return <input className="input" {...props}/>;
 }
+
 function TextArea(props){
 return <textarea className="input" {...props}/>;
 }
+
 function groupByDate(items,dateKey="dueDate"){
 const grouped={
 Overdue:[],
@@ -401,33 +512,42 @@ Tomorrow:[],
 Upcoming:[],
 "No Date":[]
 };
+
 items.forEach(item=>{
 const d=item[dateKey];
+
 if(!d){
 grouped["No Date"].push(item);
 return;
 }
+
 if(d<today()){
 grouped.Overdue.push(item);
 return;
 }
+
 if(d===today()){
 grouped.Today.push(item);
 return;
 }
+
 if(d===daysFrom(1)){
 grouped.Tomorrow.push(item);
 return;
 }
+
 const diff=(new Date(d)-new Date(today()))/(1000*60*60*24);
+
 if(diff<=7){
 grouped["This Week"].push(item);
 }else{
 grouped.Upcoming.push(item);
 }
 });
+
 return grouped;
 }
+
 function Agenda({tasks,setTasks,setUndo,openTask}){
 const pending=tasks
 .filter(t=>t.status!=="done")
@@ -436,7 +556,9 @@ if(!a.dueDate)return 1;
 if(!b.dueDate)return -1;
 return a.dueDate.localeCompare(b.dueDate);
 });
+
 const grouped=groupByDate(pending);
+
 const toggle=(id)=>{
 let old=null;
 setTasks(ts=>ts.map(t=>{
@@ -446,16 +568,20 @@ return {...t,status:"done",completedAt:today()};
 }));
 setUndo(old);
 };
+
 const changeDate=(id,date)=>{
 setTasks(ts=>ts.map(t=>t.id===id?{...t,dueDate:date}:t));
 };
+
 return(
 <div className="page">
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
 <h1 className="pageTitle">Agenda</h1>
 <button className="btn" onClick={openTask}>Add</button>
 </div>
+
 {pending.length===0&&<div className="empty">Nothing pending.</div>}
+
 {Object.entries(grouped).map(([section,items])=>{
 if(!items.length)return null;
 return(
@@ -476,9 +602,11 @@ setTasks={setTasks}
 </div>
 );
 }
+
 function TaskCard({task,toggle,changeDate,setTasks}){
 const [open,setOpen]=useState(false);
 const [custom,setCustom]=useState(false);
+
 return(
 <div className="card">
 <div className="row">
@@ -494,6 +622,7 @@ return(
 </div>
 <button className="iconBtn" onClick={()=>setTasks(ts=>ts.map(t=>t.id===task.id?{...t,pinned:!t.pinned}:t))}>Pin</button>
 </div>
+
 {open&&(
 <div className="actions">
 <button className="btn small secondary" onClick={()=>changeDate(task.id,today())}>Today</button>
@@ -508,19 +637,25 @@ return(
 </div>
 );
 }
+
 function Inbox({inbox,setInbox,setTasks,setOrders}){
 const [text,setText]=useState("");
+
 const add=()=>{
 if(!text.trim())return;
 setInbox(items=>[{id:uid(),text:text.trim(),createdAt:today(),pinned:false},...items]);
 setText("");
 };
+
 const remove=(id)=>{
 setInbox(items=>items.filter(i=>i.id!==id));
 };
+
 const categorize=(item,type)=>{
 remove(item.id);
+
 if(type==="done")return;
+
 if(type==="order"){
 setOrders(os=>[{
 id:uid(),
@@ -534,7 +669,9 @@ notes:"Created from Inbox"
 },...os]);
 return;
 }
+
 const category=type==="later"?"Other":type;
+
 setTasks(ts=>[{
 id:uid(),
 title:item.text,
@@ -545,9 +682,11 @@ pinned:false,
 notes:""
 },...ts]);
 };
+
 return(
 <div className="page">
 <h1 className="pageTitle">Inbox</h1>
+
 <div className="quick">
 <div className="quickRow">
 <input className="input" value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")add();}} placeholder="Quick dump anything..."/>
@@ -555,7 +694,9 @@ return(
 </div>
 <div className="sub">Fast capture tasks or orders. Sort later.</div>
 </div>
+
 {inbox.length===0&&<div className="empty">Inbox empty.</div>}
+
 {inbox.map(item=>(
 <div className="card" key={item.id}>
 <div className="row">
@@ -565,6 +706,7 @@ return(
 </div>
 <button className="iconBtn" onClick={()=>remove(item.id)}>X</button>
 </div>
+
 <div className="actions">
 <button className="btn small secondary" onClick={()=>categorize(item,"Personal")}>Personal</button>
 <button className="btn small secondary" onClick={()=>categorize(item,"Kala")}>Kala Task</button>
@@ -578,11 +720,14 @@ return(
 </div>
 );
 }
+
 function Orders({orders,setOrders}){
 const [show,setShow]=useState(false);
 const [edit,setEdit]=useState(null);
 const [filter,setFilter]=useState("active");
+
 const active=o=>!["Delivered"].includes(o.stage);
+
 const visible=orders.filter(o=>{
 if(filter==="all")return true;
 if(filter==="active")return active(o);
@@ -593,13 +738,16 @@ if(!a.dueDate)return 1;
 if(!b.dueDate)return -1;
 return a.dueDate.localeCompare(b.dueDate);
 });
+
 const grouped=groupByDate(visible);
 grouped.Delivered=visible.filter(o=>o.stage==="Delivered");
+
 Object.keys(grouped).forEach(k=>{
 if(k!=="Delivered"){
 grouped[k]=grouped[k].filter(o=>o.stage!=="Delivered");
 }
 });
+
 const nextStage=(id)=>{
 setOrders(os=>os.map(o=>{
 if(o.id!==id)return o;
@@ -607,23 +755,28 @@ const i=orderStages.indexOf(o.stage);
 return {...o,stage:orderStages[Math.min(i+1,orderStages.length-1)]};
 }));
 };
+
 const remove=(id)=>{
 if(confirm("Delete order?")){
 setOrders(os=>os.filter(o=>o.id!==id));
 }
 };
+
 return(
 <div className="page">
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
 <h1 className="pageTitle">Orders</h1>
 <button className="btn" onClick={()=>{setEdit(null);setShow(true);}}>Add</button>
 </div>
+
 <div className="actions" style={{marginTop:-8,marginBottom:14}}>
 <button className={"btn small "+(filter==="active"?"":"secondary")} onClick={()=>setFilter("active")}>Active</button>
 <button className={"btn small "+(filter==="all"?"":"secondary")} onClick={()=>setFilter("all")}>All</button>
 <button className={"btn small "+(filter==="delivered"?"":"secondary")} onClick={()=>setFilter("delivered")}>Delivered</button>
 </div>
+
 {visible.length===0&&<div className="empty">No orders.</div>}
+
 {Object.entries(grouped).map(([section,items])=>{
 if(!items.length)return null;
 return(
@@ -641,6 +794,7 @@ onDelete={()=>remove(order.id)}
 </div>
 );
 })}
+
 {show&&(
 <OrderModal
 order={edit}
@@ -658,6 +812,7 @@ setShow(false);
 </div>
 );
 }
+
 function OrderCard({order,nextStage,onEdit,onDelete}){
 return(
 <div className="card">
@@ -674,9 +829,11 @@ return(
 {order.notes&&<div className="sub">{order.notes}</div>}
 </div>
 </div>
+
 <div className="stageLine">
 {orderStages.map(s=><span key={s} className={"stagePill "+(s===order.stage?"active":"")}>{s}</span>)}
 </div>
+
 <div className="actions">
 {order.stage!=="Delivered"&&<button className="btn small" onClick={()=>nextStage(order.id)}>Next</button>}
 <button className="btn small secondary" onClick={onEdit}>Edit</button>
@@ -685,6 +842,7 @@ return(
 </div>
 );
 }
+
 function OrderModal({order,onSave,onClose}){
 const [form,setForm]=useState(order||{
 id:uid(),
@@ -696,7 +854,9 @@ dueDate:"",
 stage:"Inquiry",
 notes:""
 });
+
 const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
+
 return(
 <Modal title={order?"Edit Order":"New Order"} onClose={onClose}>
 <Field label="Customer"><Input value={form.customer} onChange={f("customer")} placeholder="Customer name"/></Field>
@@ -714,15 +874,18 @@ return(
 </Modal>
 );
 }
+
 function Builds({builds,setBuilds}){
 const [show,setShow]=useState(false);
 const [edit,setEdit]=useState(null);
 const [open,setOpen]=useState({});
+
 const remove=(id)=>{
 if(confirm("Delete build?")){
 setBuilds(bs=>bs.filter(b=>b.id!==id));
 }
 };
+
 const next=(id)=>{
 setBuilds(bs=>bs.map(b=>{
 if(b.id!==id)return b;
@@ -730,20 +893,25 @@ const i=buildStages.indexOf(b.status);
 return {...b,status:buildStages[Math.min(i+1,buildStages.length-1)]};
 }));
 };
+
 const toggleSub=(bid,sid)=>{
 setBuilds(bs=>bs.map(b=>b.id!==bid?b:{...b,subtasks:b.subtasks.map(s=>s.id===sid?{...s,done:!s.done}:s)}));
 };
+
 const addSub=(bid,text)=>{
 if(!text.trim())return;
 setBuilds(bs=>bs.map(b=>b.id!==bid?b:{...b,subtasks:[...b.subtasks,{id:uid(),text:text.trim(),done:false}]}));
 };
+
 return(
 <div className="page">
 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
 <h1 className="pageTitle">Mandir Builds</h1>
 <button className="btn" onClick={()=>{setEdit(null);setShow(true);}}>Add</button>
 </div>
+
 {builds.length===0&&<div className="empty">No builds.</div>}
+
 {builds.map(build=>(
 <BuildCard
 key={build.id}
@@ -757,6 +925,7 @@ toggleSub={sid=>toggleSub(build.id,sid)}
 addSub={text=>addSub(build.id,text)}
 />
 ))}
+
 {show&&(
 <BuildModal
 build={edit}
@@ -774,15 +943,17 @@ setShow(false);
 </div>
 );
 }
+
 function BuildCard({build,open,toggleOpen,next,edit,remove,toggleSub,addSub}){
 const [newSub,setNewSub]=useState("");
 const done=build.subtasks.filter(s=>s.done).length;
 const pct=build.subtasks.length?Math.round(done/build.subtasks.length*100):0;
+
 return(
 <div className="card">
 <div className="row">
 <div className="grow" onClick={toggleOpen}>
-<div className="sub" style={{color:"var(--orange)",fontWeight:800}}>{build.event}</div>
+<div className="sub" style={{color:"var(--orange)",fontWeight:900}}>{build.event}</div>
 <div className="title">{build.buildName}</div>
 <div className="chips">
 <Chip color="var(--orange)">{build.status}</Chip>
@@ -792,27 +963,32 @@ return(
 </div>
 <button className="iconBtn" onClick={toggleOpen}>{open?"Up":"Down"}</button>
 </div>
+
 {build.subtasks.length>0&&(
 <div className="progress">
 <div className="progressFill" style={{width:pct+"%"}}></div>
 </div>
 )}
+
 {open&&(
 <div style={{marginTop:12}}>
 {build.people&&<div className="sub">People: {build.people}</div>}
 {build.materials&&<div className="sub">Materials: {build.materials}</div>}
 {build.notes&&<div className="sub">{build.notes}</div>}
+
 <div className="sectionTitle">Subtasks</div>
 {build.subtasks.map(s=>(
 <div key={s.id} className="row" style={{marginBottom:8}}>
-<button className={"checkbox "+(s.done?"done":"")} onClick={()=>toggleSub(s.id)}>{s.done?"✓":""}</button>
+<button className={"checkbox "+(s.done?"done":"")} onClick={()=>toggleSub(s.id)}>{s.done?"â":""}</button>
 <div className="grow title" style={{fontSize:14,textDecoration:s.done?"line-through":"none",color:s.done?"var(--muted)":"var(--text)"}}>{s.text}</div>
 </div>
 ))}
+
 <div className="quickRow" style={{marginTop:10}}>
 <input className="input" value={newSub} onChange={e=>setNewSub(e.target.value)} placeholder="Add subtask"/>
 <button className="btn" onClick={()=>{addSub(newSub);setNewSub("");}}>Add</button>
 </div>
+
 <div className="actions">
 {build.status!=="Done"&&<button className="btn small" onClick={next}>Next</button>}
 <button className="btn small secondary" onClick={edit}>Edit</button>
@@ -823,6 +999,7 @@ return(
 </div>
 );
 }
+
 function BuildModal({build,onSave,onClose}){
 const [form,setForm]=useState(build||{
 id:uid(),
@@ -836,7 +1013,9 @@ materials:"",
 notes:"",
 subtasks:[]
 });
+
 const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
+
 return(
 <Modal title={build?"Edit Build":"New Build"} onClose={onClose}>
 <Field label="Event"><Input value={form.event} onChange={f("event")} placeholder="Diwali 2026"/></Field>
@@ -855,6 +1034,7 @@ return(
 </Modal>
 );
 }
+
 function TaskModal({onClose,onSave}){
 const [form,setForm]=useState({
 id:uid(),
@@ -865,7 +1045,9 @@ status:"todo",
 pinned:false,
 notes:""
 });
+
 const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
+
 return(
 <Modal title="New Task" onClose={onClose}>
 <Field label="Task"><Input value={form.title} onChange={f("title")} placeholder="What needs to be done?"/></Field>
@@ -883,6 +1065,7 @@ return(
 </Modal>
 );
 }
+
 function Settings({data,setData,onClose}){
 const exportData=()=>{
 const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
@@ -891,6 +1074,7 @@ a.href=URL.createObjectURL(blob);
 a.download="life-dashboard-backup-"+today()+".json";
 a.click();
 };
+
 const importData=e=>{
 const file=e.target.files[0];
 if(!file)return;
@@ -906,12 +1090,14 @@ alert("Bad file");
 };
 reader.readAsText(file);
 };
+
 return(
 <Modal title="Settings" onClose={onClose}>
 <div className="card">
 <div className="title">Install as app</div>
 <div className="sub">Open in Safari, tap Share, then Add to Home Screen.</div>
 </div>
+
 <div className="actions">
 <button className="btn" onClick={exportData}>Export Backup</button>
 <label className="btn secondary">
@@ -919,6 +1105,7 @@ Import Backup
 <input type="file" accept=".json" style={{display:"none"}} onChange={importData}/>
 </label>
 </div>
+
 <div className="card" style={{marginTop:14}}>
 <div className="title">Data note</div>
 <div className="sub">This app saves data on this phone/browser using local storage. Export backups often.</div>
@@ -926,36 +1113,44 @@ Import Backup
 </Modal>
 );
 }
+
 function App(){
 const [data,setDataRaw]=useState(()=>load()||SAMPLE);
 const [tab,setTab]=useState("agenda");
 const [settings,setSettings]=useState(false);
 const [taskModal,setTaskModal]=useState(false);
 const [undo,setUndo]=useState(null);
+
 useEffect(()=>save(data),[data]);
+
 const setData=next=>{
 setDataRaw(prev=>typeof next==="function"?next(prev):next);
 };
+
 const setInbox=fn=>setData(d=>({...d,inbox:typeof fn==="function"?fn(d.inbox):fn}));
 const setTasks=fn=>setData(d=>({...d,tasks:typeof fn==="function"?fn(d.tasks):fn}));
 const setOrders=fn=>setData(d=>({...d,orders:typeof fn==="function"?fn(d.orders):fn}));
 const setBuilds=fn=>setData(d=>({...d,builds:typeof fn==="function"?fn(d.builds):fn}));
+
 useEffect(()=>{
 if(!undo)return;
 const timer=setTimeout(()=>setUndo(null),5000);
 return()=>clearTimeout(timer);
 },[undo]);
+
 const restoreUndo=()=>{
 if(!undo)return;
 setTasks(ts=>ts.map(t=>t.id===undo.id?undo:t));
 setUndo(null);
 };
+
 const tabs=[
 {id:"agenda",label:"Agenda",icon:"A"},
 {id:"inbox",label:"Inbox",icon:"I"},
 {id:"orders",label:"Orders",icon:"O"},
 {id:"builds",label:"Builds",icon:"B"}
 ];
+
 return(
 <div className="app">
 <div className="header">
@@ -965,10 +1160,12 @@ return(
 <button className="iconBtn" onClick={()=>setSettings(true)}>Set</button>
 </div>
 </div>
+
 {tab==="agenda"&&<Agenda tasks={data.tasks} setTasks={setTasks} setUndo={setUndo} openTask={()=>setTaskModal(true)}/>}
 {tab==="inbox"&&<Inbox inbox={data.inbox} setInbox={setInbox} setTasks={setTasks} setOrders={setOrders}/>}
 {tab==="orders"&&<Orders orders={data.orders} setOrders={setOrders}/>}
 {tab==="builds"&&<Builds builds={data.builds} setBuilds={setBuilds}/>}
+
 <div className="bottomNav">
 {tabs.map(t=>(
 <button key={t.id} className={"navBtn "+(tab===t.id?"active":"")} onClick={()=>setTab(t.id)}>
@@ -977,12 +1174,14 @@ return(
 </button>
 ))}
 </div>
+
 {undo&&(
 <div className="undo">
 <div>Task completed</div>
 <button className="btn small" onClick={restoreUndo}>Undo</button>
 </div>
 )}
+
 {taskModal&&(
 <TaskModal
 onClose={()=>setTaskModal(false)}
@@ -992,12 +1191,15 @@ setTaskModal(false);
 }}
 />
 )}
+
 {settings&&<Settings data={data} setData={setData} onClose={()=>setSettings(false)}/>}
 </div>
 );
 }
+
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
+
 <script>
 const manifest={
 name:"Life Dashboard",
