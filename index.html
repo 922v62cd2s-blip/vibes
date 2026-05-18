@@ -1,240 +1,1019 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="Life Dashboard" />
-<meta name="theme-color" content="#0f0f11" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Life Dashboard"/>
+<meta name="theme-color" content="#0f0f11"/>
 <title>Life Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
 :root{
-  --bg:#0f0f11;--surface:#18181c;--surface2:#222228;--border:#2a2a32;
-  --text:#f0f0f2;--text2:#8888a0;--accent:#d4a853;--personal:#5b8cff;
-  --kala:#c97cf4;--mandir:#f4a14e;--other:#4ecda4;--danger:#ff5f6d;--success:#3dd68c;
-}
-[data-light]{
-  --bg:#f5f5f7;--surface:#ffffff;--surface2:#f0f0f4;--border:#e0e0e8;
-  --text:#1a1a2e;--text2:#666680;--accent:#b8860b;
+--bg:#0f0f11;
+--card:#18181c;
+--card2:#23232a;
+--border:#303038;
+--text:#f4f4f6;
+--muted:#9a9aaa;
+--gold:#d4a853;
+--blue:#5b8cff;
+--purple:#c97cf4;
+--orange:#f4a14e;
+--green:#3dd68c;
+--red:#ff5f6d;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg)}
-body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
-button,input,textarea,select{font-family:'Sora',sans-serif;font-size:16px}
-button{touch-action:manipulation}
-::-webkit-scrollbar{width:0;height:0}
+body{
+background:var(--bg);
+color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+min-height:100vh;
+}
+button,input,textarea,select{
+font-family:inherit;
+font-size:16px;
+}
+button{cursor:pointer}
+.app{
+max-width:620px;
+margin:0 auto;
+min-height:100vh;
+padding-bottom:86px;
+}
+.header{
+position:sticky;
+top:0;
+z-index:20;
+background:rgba(15,15,17,.95);
+backdrop-filter:blur(16px);
+border-bottom:1px solid var(--border);
+padding:14px 16px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+}
+.brand{
+font-weight:800;
+font-size:18px;
+}
+.headerBtns{display:flex;gap:8px}
+.iconBtn{
+background:var(--card);
+color:var(--text);
+border:1px solid var(--border);
+border-radius:10px;
+padding:8px 11px;
+font-weight:700;
+}
+.page{
+padding:18px 16px;
+}
+.pageTitle{
+font-size:30px;
+font-weight:800;
+margin-bottom:16px;
+}
+.card{
+background:var(--card);
+border:1px solid var(--border);
+border-radius:16px;
+padding:14px;
+margin-bottom:12px;
+}
+.sectionTitle{
+font-size:12px;
+font-weight:800;
+color:var(--muted);
+text-transform:uppercase;
+letter-spacing:.7px;
+margin:22px 0 10px;
+}
+.row{
+display:flex;
+gap:10px;
+align-items:flex-start;
+}
+.grow{flex:1;min-width:0}
+.title{
+font-weight:700;
+font-size:15px;
+line-height:1.35;
+}
+.sub{
+color:var(--muted);
+font-size:13px;
+line-height:1.4;
+margin-top:4px;
+}
+.chips{
+display:flex;
+gap:6px;
+flex-wrap:wrap;
+margin-top:8px;
+}
+.chip{
+font-size:11px;
+font-weight:700;
+border-radius:999px;
+padding:4px 8px;
+background:var(--card2);
+color:var(--muted);
+border:1px solid var(--border);
+}
+.btn{
+border:none;
+border-radius:10px;
+padding:10px 14px;
+font-weight:800;
+background:var(--gold);
+color:#111;
+}
+.btn.secondary{
+background:var(--card2);
+color:var(--text);
+border:1px solid var(--border);
+}
+.btn.danger{
+background:rgba(255,95,109,.15);
+color:var(--red);
+border:1px solid rgba(255,95,109,.35);
+}
+.btn.small{
+font-size:13px;
+padding:7px 10px;
+}
+.input{
+width:100%;
+background:var(--card2);
+color:var(--text);
+border:1px solid var(--border);
+border-radius:12px;
+padding:12px;
+outline:none;
+}
+textarea.input{min-height:82px;resize:vertical}
+.field{margin-bottom:13px}
+.label{
+display:block;
+font-size:12px;
+font-weight:800;
+color:var(--muted);
+text-transform:uppercase;
+letter-spacing:.6px;
+margin-bottom:6px;
+}
+.checkbox{
+width:24px;
+height:24px;
+border-radius:7px;
+border:2px solid var(--border);
+background:transparent;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-shrink:0;
+font-weight:900;
+}
+.checkbox.done{
+background:var(--green);
+border-color:var(--green);
+}
+.actions{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+.bottomNav{
+position:fixed;
+bottom:0;
+left:50%;
+transform:translateX(-50%);
+z-index:30;
+width:100%;
+max-width:620px;
+background:rgba(15,15,17,.97);
+backdrop-filter:blur(16px);
+border-top:1px solid var(--border);
+display:flex;
+padding-bottom:env(safe-area-inset-bottom);
+}
+.navBtn{
+flex:1;
+border:0;
+background:transparent;
+color:var(--muted);
+padding:10px 0 8px;
+font-size:11px;
+font-weight:700;
+}
+.navBtn.active{color:var(--gold)}
+.navIcon{font-size:19px;display:block;margin-bottom:3px}
+.quick{
+background:var(--card);
+border:1px solid rgba(212,168,83,.5);
+border-radius:16px;
+padding:14px;
+margin-bottom:16px;
+}
+.quickRow{
+display:flex;
+gap:8px;
+}
+.modalBg{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.72);
+z-index:100;
+display:flex;
+align-items:flex-end;
+}
+.modal{
+width:100%;
+max-width:620px;
+margin:0 auto;
+background:var(--card);
+border-radius:20px 20px 0 0;
+max-height:90vh;
+overflow:auto;
+padding:18px 16px 34px;
+}
+.modalTop{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:16px;
+}
+.modalTitle{
+font-size:21px;
+font-weight:900;
+}
+.progress{
+height:5px;
+background:var(--card2);
+border-radius:99px;
+overflow:hidden;
+margin-top:10px;
+}
+.progressFill{
+height:100%;
+background:var(--orange);
+}
+.stageLine{
+display:flex;
+gap:5px;
+overflow-x:auto;
+padding-bottom:3px;
+margin-top:10px;
+}
+.stagePill{
+font-size:10px;
+font-weight:800;
+border-radius:8px;
+padding:5px 8px;
+background:var(--card2);
+color:var(--muted);
+white-space:nowrap;
+}
+.stagePill.active{
+background:var(--purple);
+color:white;
+}
+.empty{
+text-align:center;
+color:var(--muted);
+padding:50px 10px;
+}
+.undo{
+position:fixed;
+left:16px;
+right:16px;
+bottom:88px;
+z-index:80;
+max-width:590px;
+margin:0 auto;
+background:var(--card2);
+border:1px solid var(--border);
+border-radius:14px;
+padding:13px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+box-shadow:0 8px 30px rgba(0,0,0,.4);
+}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useEffect,useRef}=React;
-
-const STORAGE_KEY='lifedash_v3_agenda';
-const today=()=>new Date().toISOString().split('T')[0];
-const daysFrom=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().split('T')[0];};
-const uid=()=>Math.random().toString(36).slice(2,10);
-const load=()=>{try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'null')}catch{return null}};
-const save=d=>localStorage.setItem(STORAGE_KEY,JSON.stringify(d));
-const fmtDate=d=>{if(!d)return'';const x=new Date(d+'T00:00:00');return x.toLocaleDateString('en-US',{month:'short',day:'numeric'});};
-const weekday=d=>{const x=new Date(d+'T00:00:00');return x.toLocaleDateString('en-US',{weekday:'short'});};
-const isPast=d=>d&&d<today();
-const isToday=d=>d===today();
-const tomorrow=()=>daysFrom(1);
-const catLabel={personal:'Personal',kala:'Kala',mandir:'Mandir',other:'Other'};
-const catColor={personal:'var(--personal)',kala:'var(--kala)',mandir:'var(--mandir)',other:'var(--other)'};
-const stageList=['Inquiry','Designing','Printing','Finishing','Packing','Shipped','Delivered'];
-const stageColor={Inquiry:'#8888a0',Designing:'#5b8cff',Printing:'#f4a14e',Finishing:'#c97cf4',Packing:'#d4a853',Shipped:'#3dd68c',Delivered:'#4ecda4'};
-const buildStatus=['Idea','Planning','Materials','Building','Ready','Done'];
-const buildColor={Idea:'#8888a0',Planning:'#5b8cff',Materials:'#f4a14e',Building:'#c97cf4',Ready:'#d4a853',Done:'#3dd68c'};
-
-const SAMPLE={
-  inbox:[
-    {id:'i1',text:'Call Dev about Diwali event',createdAt:today(),pinned:false},
-    {id:'i2',text:'Need purple flowers for altar piece',createdAt:today(),pinned:false},
-    {id:'i3',text:'Ship Megha order ASAP',createdAt:today(),pinned:true}
-  ],
-  tasks:[
-    {id:'t1',title:'Call Dev about Diwali event',category:'personal',dueDate:today(),status:'todo',pinned:true,notes:''},
-    {id:'t2',title:'Finish wedding box lid design',category:'kala',dueDate:today(),status:'todo',pinned:false,notes:'Purple with gold foil'},
-    {id:'t3',title:'Order foam sheets 2 inch',category:'mandir',dueDate:daysFrom(2),status:'todo',pinned:false,notes:''},
-    {id:'t4',title:'Reply to Priya about custom frame',category:'kala',dueDate:daysFrom(4),status:'todo',pinned:false,notes:''},
-    {id:'t5',title:'Random idea: telescope illusion build',category:'other',dueDate:'',status:'todo',pinned:false,notes:''}
-  ],
-  orders:[
-    {id:'o1',customer:'Megha Patel',item:'Wooden wedding box',source:'Instagram DM',price:'85',dueDate:today(),stage:'Finishing',notes:'Purple velvet lining, gold initials'},
-    {id:'o2',customer:'Ravi & Sunita',item:'Ganesh 3D print',source:'Family',price:'45',dueDate:daysFrom(5),stage:'Printing',notes:'6 inch, white PLA'},
-    {id:'o3',customer:'Anita Sharma',item:'Custom name frame',source:'Friend',price:'30',dueDate:daysFrom(10),stage:'Inquiry',notes:'Modern font, black frame'}
-  ],
-  builds:[
-    {id:'b1',event:'Diwali 2026',buildName:'Sinhasan',section:'Sanctum',status:'Building',date:'2026-10-20',people:'Raj, Dev, Priya',notes:'Gold + cream theme',materials:'Foam, gold paint, fabric, MDF',subtasks:[
-      {id:'s1',text:'Finalize design sketch',done:true},{id:'s2',text:'Buy foam',done:true},{id:'s3',text:'Print decorative parts',done:false},{id:'s4',text:'Paint gold',done:false}
-    ]},
-    {id:'b2',event:'Navratri 2026',buildName:'Stage Backdrop',section:'Hall',status:'Planning',date:'2026-10-02',people:'Dev, Meena',notes:'LED panel backdrop concept',materials:'PVC, LEDs, fabric',subtasks:[{id:'s5',text:'Get hall measurements',done:false}]}
-  ]
+const {useState,useEffect}=React;
+const KEY="life_dashboard_clean_v1";
+const today=()=>new Date().toISOString().split("T")[0];
+const daysFrom=(n)=>{
+const d=new Date();
+d.setDate(d.getDate()+n);
+return d.toISOString().split("T")[0];
 };
-
-function Icon({name,size=20,color='currentColor'}){
- const common={width:size,height:size,fill:'none',stroke:color,strokeWidth:2,strokeLinecap:'round',strokeLinejoin:'round',viewBox:'0 0 24 24'};
- const icons={
-  agenda:<svg {...common}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h8M8 18h5"/></svg>,
-  inbox:<svg {...common}><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>,
-  box:<svg {...common}><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
-  temple:<svg {...common}><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>,
-  plus:<svg {...common} strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
-  check:<svg {...common} strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>,
-  x:<svg {...common} strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
-  pin:<svg {...common}><path d="M12 17v5M5 17h14l-2-7V4H7v6l-2 7z"/></svg>,
-  edit:<svg {...common}><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
-  trash:<svg {...common}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>,
-  search:<svg {...common}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
-  arrow:<svg {...common} strokeWidth="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>,
-  chevron:<svg {...common} strokeWidth="2.5"><polyline points="6 9 12 15 18 9"/></svg>,
-  download:<svg {...common}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
-  upload:<svg {...common}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
- };
- return icons[name]||null;
+const fmt=(date)=>{
+if(!date)return"";
+const d=new Date(date+"T00:00:00");
+return d.toLocaleDateString("en-US",{month:"short",day:"numeric"});
+};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const load=()=>{
+try{
+return JSON.parse(localStorage.getItem(KEY))||null;
+}catch{
+return null;
 }
-
-function Chip({label,color='var(--text2)'}){return <span style={{background:color+'22',color,border:`1px solid ${color}44`,borderRadius:999,padding:'3px 8px',fontSize:11,fontWeight:700,whiteSpace:'nowrap'}}>{label}</span>}
-function Btn({children,onClick,variant='primary',style={},disabled=false}){const s={primary:{background:'var(--accent)',color:'#0f0f11',border:'none'},secondary:{background:'var(--surface2)',color:'var(--text)',border:'1px solid var(--border)'},danger:{background:'var(--danger)22',color:'var(--danger)',border:'1px solid var(--danger)44'}};return <button disabled={disabled} onClick={onClick} style={{...s[variant],borderRadius:10,padding:'11px 16px',fontWeight:700,fontSize:14,display:'flex',alignItems:'center',justifyContent:'center',gap:6,cursor:disabled?'not-allowed':'pointer',opacity:disabled?.45:1,...style}}>{children}</button>}
-function Field({label,children}){return <div style={{marginBottom:16}}><label style={{fontSize:12,fontWeight:800,color:'var(--text2)',textTransform:'uppercase',letterSpacing:.5,display:'block',marginBottom:7}}>{label}</label>{children}</div>}
-function Input({value,onChange,placeholder,type='text',rows}){const style={width:'100%',background:'var(--surface2)',border:'1.5px solid var(--border)',borderRadius:10,padding:'12px 14px',color:'var(--text)',outline:'none',resize:'vertical'};return rows?<textarea value={value} onChange={onChange} placeholder={placeholder} rows={rows} style={style}/>:<input type={type} value={value} onChange={onChange} placeholder={placeholder} style={style}/>}
-function Modal({title,onClose,children}){return <div onClick={onClose} style={{position:'fixed',inset:0,background:'#000b',zIndex:1000,display:'flex',alignItems:'flex-end',justifyContent:'center'}}><div onClick={e=>e.stopPropagation()} style={{background:'var(--surface)',width:'100%',maxWidth:600,maxHeight:'90vh',overflowY:'auto',borderRadius:'22px 22px 0 0',padding:'12px 20px 40px'}}><div style={{width:44,height:5,borderRadius:9,background:'var(--border)',margin:'0 auto 18px'}}/><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}><h2 style={{fontSize:21}}>{title}</h2><button onClick={onClose} style={{background:'var(--surface2)',border:'none',borderRadius:10,padding:9,color:'var(--text2)'}}><Icon name="x" size={18}/></button></div>{children}</div></div>}
-
-function TaskCard({task,setTasks}){
- const done=task.status==='done';
- const quickDate=(val)=>setTasks(ts=>ts.map(t=>t.id===task.id?{...t,dueDate:val}:t));
- return <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderLeft:`4px solid ${catColor[task.category]}`,borderRadius:15,marginBottom:10,overflow:'hidden',opacity:done?.55:1}}>
-  <div style={{padding:14,display:'flex',gap:12,alignItems:'flex-start'}}>
-   <button onClick={()=>setTasks(ts=>ts.map(t=>t.id===task.id?{...t,status:t.status==='done'?'todo':'done'}:t))} style={{width:25,height:25,borderRadius:7,border:done?'none':'2px solid var(--border)',background:done?'var(--success)':'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{done&&<Icon name="check" size={14} color="#fff"/>}</button>
-   <div style={{flex:1,minWidth:0}}>
-    <p style={{fontWeight:700,fontSize:15,lineHeight:1.35,textDecoration:done?'line-through':'none'}}>{task.title}</p>
-    <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:7}}>
-     <Chip label={catLabel[task.category]} color={catColor[task.category]}/>{task.dueDate&&<Chip label={`${weekday(task.dueDate)} ${fmtDate(task.dueDate)}`} color={isPast(task.dueDate)&&!done?'var(--danger)':'var(--text2)'}/>} {task.pinned&&<Chip label="Pinned" color="var(--accent)"/>}
-    </div>
-    {task.notes&&<p style={{fontSize:13,color:'var(--text2)',marginTop:8,lineHeight:1.5}}>{task.notes}</p>}
-    <div style={{display:'flex',gap:6,overflowX:'auto',marginTop:10,paddingBottom:2}}>
-     <button onClick={()=>quickDate(today())} style={miniBtn}>Today</button>
-     <button onClick={()=>quickDate(tomorrow())} style={miniBtn}>Tomorrow</button>
-     <button onClick={()=>quickDate(daysFrom(3))} style={miniBtn}>+3d</button>
-     <button onClick={()=>quickDate(daysFrom(7))} style={miniBtn}>Next wk</button>
-     <button onClick={()=>quickDate('')} style={miniBtn}>No date</button>
-     <input type="date" value={task.dueDate||''} onChange={e=>quickDate(e.target.value)} style={{...miniBtn,minWidth:132,color:'var(--text)'}} />
-    </div>
-   </div>
-   <button onClick={()=>setTasks(ts=>ts.map(t=>t.id===task.id?{...t,pinned:!t.pinned}:t))} style={{background:'none',border:'none',color:task.pinned?'var(--accent)':'var(--text2)',padding:4}}><Icon name="pin" size={16}/></button>
-  </div>
- </div>
+};
+const save=(data)=>{
+localStorage.setItem(KEY,JSON.stringify(data));
+};
+const SAMPLE={
+inbox:[
+{id:"i1",text:"Call Dev about Diwali meeting",createdAt:today(),pinned:false},
+{id:"i2",text:"Megha wedding box order 85 dollars",createdAt:today(),pinned:true}
+],
+tasks:[
+{id:"t1",title:"Finish wedding box lid",category:"Kala",dueDate:today(),status:"todo",pinned:true,notes:"Gold initials"},
+{id:"t2",title:"Buy foam sheets",category:"Mandir",dueDate:daysFrom(1),status:"todo",pinned:false,notes:"For sinhasan"},
+{id:"t3",title:"Gym",category:"Personal",dueDate:today(),status:"todo",pinned:false,notes:""}
+],
+orders:[
+{id:"o1",customer:"Megha",item:"Wedding box",source:"Instagram DM",price:"85",dueDate:today(),stage:"Finishing",notes:"Purple velvet lining"},
+{id:"o2",customer:"Ravi",item:"Ganesh print",source:"Family",price:"45",dueDate:daysFrom(4),stage:"Printing",notes:"White PLA"},
+{id:"o3",customer:"Unknown",item:"Inquiry from Instagram",source:"Quick Add",price:"",dueDate:"",stage:"Inquiry",notes:"Need details"}
+],
+builds:[
+{id:"b1",event:"Diwali 2026",buildName:"Sinhasan",section:"Main",status:"Building",date:daysFrom(20),people:"Dev, Raj",materials:"Foam, gold paint, MDF",notes:"Gold and cream theme",subtasks:[
+{id:"s1",text:"Finalize design",done:true},
+{id:"s2",text:"Buy foam",done:false},
+{id:"s3",text:"Paint parts",done:false}
+]},
+{id:"b2",event:"Navratri 2026",buildName:"Stage backdrop",section:"Hall",status:"Planning",date:daysFrom(12),people:"",materials:"PVC, fabric",notes:"",subtasks:[]}
+]
+};
+const taskColors={
+Personal:"var(--blue)",
+Kala:"var(--purple)",
+Mandir:"var(--orange)",
+Other:"var(--green)"
+};
+const orderStages=["Inquiry","Designing","Printing","Finishing","Packing","Shipped","Delivered"];
+const buildStages=["Idea","Planning","Materials","Building","Ready","Done"];
+function Chip({children,color}){
+return <span className="chip" style={{color:color||"var(--muted)"}}>{children}</span>;
 }
-const miniBtn={background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,padding:'7px 10px',color:'var(--text2)',fontSize:12,fontWeight:700,whiteSpace:'nowrap'};
-
-function AgendaTab({tasks,setTasks,openAddTask}){
- const pending=[...tasks].filter(t=>t.status!=='done').sort((a,b)=>{
-  if(a.pinned!==b.pinned)return b.pinned-a.pinned;
-  if(!a.dueDate&&!b.dueDate)return 0;
-  if(!a.dueDate)return 1;if(!b.dueDate)return -1;
-  return a.dueDate.localeCompare(b.dueDate);
- });
- const groups={Overdue:[],Today:[],Tomorrow:[], 'This Week':[], Upcoming:[], 'No Date':[]};
- pending.forEach(t=>{
-  if(!t.dueDate)groups['No Date'].push(t);
-  else if(t.dueDate<today())groups.Overdue.push(t);
-  else if(t.dueDate===today())groups.Today.push(t);
-  else if(t.dueDate===tomorrow())groups.Tomorrow.push(t);
-  else if(t.dueDate<=daysFrom(7))groups['This Week'].push(t);
-  else groups.Upcoming.push(t);
- });
- const order=['Overdue','Today','Tomorrow','This Week','Upcoming','No Date'];
- return <div style={{padding:'0 16px 104px'}}>
-  <div style={{padding:'20px 0 14px',display:'flex',justifyContent:'space-between',alignItems:'center'}}><div><p style={{fontSize:13,color:'var(--text2)',marginBottom:3}}>{new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}</p><h1 style={{fontSize:28}}>Agenda</h1></div><div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:'7px 12px',fontSize:13,color:'var(--text2)'}}>{pending.length} pending</div></div>
-  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:18}}>
-   <Stat label="Overdue" val={groups.Overdue.length} color="var(--danger)"/><Stat label="Today" val={groups.Today.length} color="var(--accent)"/>
-  </div>
-  {pending.length===0&&<Empty emoji="â¨" title="All clear" sub="Nothing pending"/>}
-  {order.map(g=>groups[g].length?<div key={g} style={{marginBottom:23}}><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:10}}><h3 style={{fontSize:15,fontWeight:800,color:g==='Overdue'?'var(--danger)':'var(--text)'}}>{g}</h3><span style={{fontSize:12,color:'var(--text2)'}}>{groups[g].length}</span></div>{groups[g].map(t=><TaskCard key={t.id} task={t} setTasks={setTasks}/>)}</div>:null)}
-  <button onClick={openAddTask} style={{position:'fixed',right:20,bottom:90,width:58,height:58,borderRadius:'50%',border:'none',background:'var(--accent)',color:'#0f0f11',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 4px 22px rgba(212,168,83,.4)'}}><Icon name="plus" size={26}/></button>
- </div>
+function Modal({title,onClose,children}){
+return(
+<div className="modalBg" onClick={onClose}>
+<div className="modal" onClick={e=>e.stopPropagation()}>
+<div className="modalTop">
+<div className="modalTitle">{title}</div>
+<button className="iconBtn" onClick={onClose}>X</button>
+</div>
+{children}
+</div>
+</div>
+);
 }
-function Stat({label,val,color}){return <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:14,padding:13}}><p style={{fontSize:12,color:'var(--text2)',fontWeight:700}}>{label}</p><p style={{fontSize:24,fontWeight:800,color}}>{val}</p></div>}
-function Empty({emoji,title,sub}){return <div style={{textAlign:'center',padding:'60px 20px',color:'var(--text2)'}}><div style={{fontSize:48,marginBottom:12}}>{emoji}</div><p style={{fontWeight:800,color:'var(--text)'}}>{title}</p><p style={{fontSize:14,marginTop:4}}>{sub}</p></div>}
-
-function InboxTab({inbox,setInbox,setTasks}){
- const [text,setText]=useState('');
- const add=()=>{if(!text.trim())return;setInbox(xs=>[{id:uid(),text:text.trim(),createdAt:today(),pinned:false},...xs]);setText('')};
- const categorize=(item,cat)=>{setInbox(xs=>xs.filter(x=>x.id!==item.id));if(cat==='done')return;setTasks(ts=>[{id:uid(),title:item.text,category:cat==='later'?'other':cat,dueDate:cat==='later'?'':today(),status:'todo',pinned:false,notes:''},...ts])};
- const sorted=[...inbox].sort((a,b)=>b.pinned-a.pinned);
- return <div style={{padding:'0 16px 104px'}}><h1 style={{fontSize:28,padding:'20px 0 16px'}}>Inbox</h1><div style={{background:'var(--surface)',border:'1.5px solid var(--accent)44',borderRadius:16,padding:14,marginBottom:18}}><div style={{display:'flex',gap:10}}><input value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder="Quick note..." style={{flex:1,background:'transparent',border:'none',outline:'none',color:'var(--text)'}}/><Btn onClick={add} disabled={!text.trim()}>Add</Btn></div><p style={{fontSize:12,color:'var(--text2)',marginTop:8}}>Dump first. Sort later.</p></div>{sorted.length===0&&<Empty emoji="ð¬" title="Inbox empty" sub="Add a note above"/>}{sorted.map(item=><div key={item.id} style={{background:'var(--surface)',border:'1px solid var(--border)',borderLeft:item.pinned?'4px solid var(--accent)':'1px solid var(--border)',borderRadius:14,marginBottom:12,padding:14}}><div style={{display:'flex',gap:10}}><p style={{flex:1,fontWeight:600,lineHeight:1.4}}>{item.text}</p><button onClick={()=>setInbox(xs=>xs.map(x=>x.id===item.id?{...x,pinned:!x.pinned}:x))} style={{background:'none',border:'none',color:item.pinned?'var(--accent)':'var(--text2)'}}><Icon name="pin" size={15}/></button><button onClick={()=>setInbox(xs=>xs.filter(x=>x.id!==item.id))} style={{background:'none',border:'none',color:'var(--text2)'}}><Icon name="x" size={15}/></button></div><div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:12}}>{[['personal','Personal','var(--personal)'],['kala','Kala','var(--kala)'],['mandir','Mandir','var(--mandir)'],['later','Later','var(--text2)'],['done','Done','var(--success)']].map(([k,l,c])=><button key={k} onClick={()=>categorize(item,k)} style={{background:c+'18',color:c,border:`1px solid ${c}44`,borderRadius:8,padding:'7px 11px',fontSize:12,fontWeight:700}}>{l}</button>)}</div></div>)}</div>
+function Field({label,children}){
+return <div className="field"><label className="label">{label}</label>{children}</div>;
 }
-
-function KalaTab({orders,setOrders}){
- const [show,setShow]=useState(false),[editing,setEditing]=useState(false),[filter,setFilter]=useState('active');
- const blank={id:'',customer:'',item:'',source:'Instagram DM',price:'',dueDate:'',stage:'Inquiry',notes:''};
- const [form,setForm]=useState(blank);const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
- const openNew=()=>{setForm({...blank,id:uid()});setEditing(false);setShow(true)};const openEdit=o=>{setForm(o);setEditing(true);setShow(true)};
- const saveOrder=()=>{if(!form.customer||!form.item)return;if(editing)setOrders(os=>os.map(o=>o.id===form.id?form:o));else setOrders(os=>[form,...os]);setShow(false)};
- const remove=id=>confirm('Delete order?')&&setOrders(os=>os.filter(o=>o.id!==id));
- const next=id=>setOrders(os=>os.map(o=>{if(o.id!==id)return o;const i=stageList.indexOf(o.stage);return i<stageList.length-1?{...o,stage:stageList[i+1]}:o}));
- const filtered=filter==='all'?orders:filter==='done'?orders.filter(o=>['Shipped','Delivered'].includes(o.stage)):orders.filter(o=>!['Shipped','Delivered'].includes(o.stage));
- return <div style={{padding:'0 16px 104px'}}><TopTitle title="Kala Orders" onNew={openNew} color="var(--kala)"/><Filter current={filter} set={setFilter} items={[['active','Active'],['all','All'],['done','Done']]}/>{filtered.length===0&&<Empty emoji="ð¦" title="No orders" sub="Add one with New"/>}{filtered.map(o=><div key={o.id} style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:16,marginBottom:14,overflow:'hidden'}}><div style={{background:stageColor[o.stage]+'18',borderBottom:'1px solid var(--border)',padding:'12px 16px',display:'flex',justifyContent:'space-between',gap:8}}><Chip label={o.stage} color={stageColor[o.stage]}/><div style={{display:'flex',gap:8}}>{o.dueDate&&<span style={{fontSize:12,color:isPast(o.dueDate)&&!['Shipped','Delivered'].includes(o.stage)?'var(--danger)':'var(--text2)',fontWeight:800}}>Due {fmtDate(o.dueDate)}</span>}{o.price&&<span style={{fontSize:12,color:'var(--accent)',fontWeight:800}}>${o.price}</span>}</div></div><div style={{padding:16}}><p style={{fontWeight:800,fontSize:16}}>{o.customer}</p><p style={{fontSize:14,color:'var(--text2)',marginTop:3}}>{o.item}</p><div style={{display:'flex',gap:6,marginTop:9,flexWrap:'wrap'}}><Chip label={o.source}/></div>{o.notes&&<p style={{fontSize:13,color:'var(--text2)',lineHeight:1.5,marginTop:10}}>{o.notes}</p>}</div><div style={{display:'flex',gap:8,padding:'12px 16px',borderTop:'1px solid var(--border)'}}>{o.stage!=='Delivered'&&<Btn onClick={()=>next(o.id)} variant="secondary" style={{flex:1,color:'var(--kala)'}}><Icon name="arrow" size={14}/> Move</Btn>}<Btn onClick={()=>openEdit(o)} variant="secondary"><Icon name="edit" size={16}/></Btn><Btn onClick={()=>remove(o.id)} variant="danger"><Icon name="trash" size={16}/></Btn></div></div>)}{show&&<Modal title={editing?'Edit Order':'New Order'} onClose={()=>setShow(false)}><Field label="Customer"><Input value={form.customer} onChange={f('customer')} placeholder="Name"/></Field><Field label="Item"><Input value={form.item} onChange={f('item')} placeholder="What are they ordering?"/></Field><div style={{display:'flex',gap:12}}><div style={{flex:1}}><Field label="Price"><Input value={form.price} onChange={f('price')} placeholder="85"/></Field></div><div style={{flex:1}}><Field label="Due"><Input type="date" value={form.dueDate} onChange={f('dueDate')}/></Field></div></div><Field label="Source"><select value={form.source} onChange={f('source')} style={selectStyle}>{['Instagram DM','Family','Friend','Mandir','Website','Referral','Other'].map(s=><option key={s}>{s}</option>)}</select></Field><Field label="Stage"><select value={form.stage} onChange={f('stage')} style={selectStyle}>{stageList.map(s=><option key={s}>{s}</option>)}</select></Field><Field label="Notes"><Input rows={3} value={form.notes} onChange={f('notes')} placeholder="Details..."/></Field><Btn onClick={saveOrder} style={{width:'100%'}}>Save Order</Btn></Modal>}</div>
+function Input(props){
+return <input className="input" {...props}/>;
 }
-const selectStyle={width:'100%',background:'var(--surface2)',border:'1.5px solid var(--border)',borderRadius:10,padding:'12px 14px',color:'var(--text)'};
-function TopTitle({title,onNew,color}){return <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'20px 0 16px'}}><h1 style={{fontSize:28}}>{title}</h1><button onClick={onNew} style={{background:color,color:'#fff',border:'none',borderRadius:10,padding:'10px 14px',fontWeight:800,display:'flex',alignItems:'center',gap:6}}><Icon name="plus" size={16}/>New</button></div>}
-function Filter({current,set,items}){return <div style={{display:'flex',gap:8,marginBottom:18,overflowX:'auto'}}>{items.map(([k,l])=><button key={k} onClick={()=>set(k)} style={{background:current===k?'var(--accent)22':'var(--surface)',color:current===k?'var(--accent)':'var(--text2)',border:`1px solid ${current===k?'var(--accent)':'var(--border)'}`,borderRadius:10,padding:'8px 14px',fontSize:13,fontWeight:800}}>{l}</button>)}</div>}
-
-function MandirTab({builds,setBuilds}){
- const [show,setShow]=useState(false),[editing,setEditing]=useState(false),[expanded,setExpanded]=useState({});
- const blank={id:'',event:'',buildName:'',section:'',status:'Idea',date:'',people:'',notes:'',materials:'',subtasks:[]};
- const [form,setForm]=useState(blank);const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
- const openNew=()=>{setForm({...blank,id:uid()});setEditing(false);setShow(true)};const openEdit=b=>{setForm(b);setEditing(true);setShow(true)};
- const saveBuild=()=>{if(!form.buildName)return;if(editing)setBuilds(bs=>bs.map(b=>b.id===form.id?form:b));else setBuilds(bs=>[form,...bs]);setShow(false)};
- const remove=id=>confirm('Delete build?')&&setBuilds(bs=>bs.filter(b=>b.id!==id));
- const advance=id=>setBuilds(bs=>bs.map(b=>{if(b.id!==id)return b;const i=buildStatus.indexOf(b.status);return i<buildStatus.length-1?{...b,status:buildStatus[i+1]}:b}));
- const toggleSub=(bid,sid)=>setBuilds(bs=>bs.map(b=>b.id!==bid?b:{...b,subtasks:b.subtasks.map(s=>s.id===sid?{...s,done:!s.done}:s)}));
- const addSub=(bid,text)=>setBuilds(bs=>bs.map(b=>b.id!==bid?b:{...b,subtasks:[...b.subtasks,{id:uid(),text,done:false}]}));
- const remSub=(bid,sid)=>setBuilds(bs=>bs.map(b=>b.id!==bid?b:{...b,subtasks:b.subtasks.filter(s=>s.id!==sid)}));
- return <div style={{padding:'0 16px 104px'}}><TopTitle title="Mandir Builds" onNew={openNew} color="var(--mandir)"/>{builds.length===0&&<Empty emoji="ð" title="No builds" sub="Add your first build"/>}{builds.map(b=><BuildCard key={b.id} b={b} exp={!!expanded[b.id]} toggle={()=>setExpanded(x=>({...x,[b.id]:!x[b.id]}))} edit={()=>openEdit(b)} del={()=>remove(b.id)} advance={()=>advance(b.id)} toggleSub={sid=>toggleSub(b.id,sid)} addSub={text=>addSub(b.id,text)} remSub={sid=>remSub(b.id,sid)}/>) }{show&&<Modal title={editing?'Edit Build':'New Build'} onClose={()=>setShow(false)}><Field label="Event"><Input value={form.event} onChange={f('event')} placeholder="Diwali 2026"/></Field><Field label="Build"><Input value={form.buildName} onChange={f('buildName')} placeholder="Sinhasan"/></Field><div style={{display:'flex',gap:12}}><div style={{flex:1}}><Field label="Section"><Input value={form.section} onChange={f('section')} placeholder="Hall"/></Field></div><div style={{flex:1}}><Field label="Date"><Input type="date" value={form.date} onChange={f('date')}/></Field></div></div><Field label="Status"><select value={form.status} onChange={f('status')} style={selectStyle}>{buildStatus.map(s=><option key={s}>{s}</option>)}</select></Field><Field label="People"><Input value={form.people} onChange={f('people')} placeholder="Raj, Dev..."/></Field><Field label="Materials"><Input value={form.materials} onChange={f('materials')} placeholder="Foam, paint..."/></Field><Field label="Notes"><Input rows={3} value={form.notes} onChange={f('notes')} placeholder="Details..."/></Field><Btn onClick={saveBuild} style={{width:'100%'}}>Save Build</Btn></Modal>}</div>
+function TextArea(props){
+return <textarea className="input" {...props}/>;
 }
-function BuildCard({b,exp,toggle,edit,del,advance,toggleSub,addSub,remSub}){
- const [sub,setSub]=useState('');const done=b.subtasks.filter(s=>s.done).length;const pct=b.subtasks.length?Math.round(done/b.subtasks.length*100):0;
- return <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderLeft:`4px solid ${buildColor[b.status]}`,borderRadius:16,marginBottom:14,overflow:'hidden'}}><div style={{padding:16}}><div style={{display:'flex',justifyContent:'space-between',gap:10}}><div><p style={{fontSize:11,color:'var(--mandir)',fontWeight:800,textTransform:'uppercase',letterSpacing:.5}}>{b.event}</p><p style={{fontWeight:800,fontSize:16,margin:'3px 0 7px'}}>{b.buildName}</p><div style={{display:'flex',gap:6,flexWrap:'wrap'}}><Chip label={b.status} color={buildColor[b.status]}/>{b.section&&<Chip label={b.section}/>} {b.date&&<Chip label={fmtDate(b.date)}/>}</div></div><button onClick={toggle} style={{alignSelf:'start',background:'var(--surface2)',border:'none',borderRadius:8,padding:8,color:'var(--text2)'}}><Icon name="chevron" size={16}/></button></div>{b.subtasks.length>0&&<div style={{marginTop:12}}><div style={{display:'flex',justifyContent:'space-between',fontSize:12,color:'var(--text2)',marginBottom:4}}><span>{done}/{b.subtasks.length} subtasks</span><b style={{color:'var(--mandir)'}}>{pct}%</b></div><div style={{height:5,borderRadius:8,background:'var(--surface2)'}}><div style={{height:5,borderRadius:8,background:buildColor[b.status],width:pct+'%'}}/></div></div>}</div>{exp&&<div style={{borderTop:'1px solid var(--border)',padding:16}}>{b.people&&<p style={{fontSize:13,color:'var(--text2)',marginBottom:8}}>People: {b.people}</p>}{b.materials&&<p style={{fontSize:13,color:'var(--text2)',marginBottom:8}}>Materials: {b.materials}</p>}{b.notes&&<p style={{fontSize:13,color:'var(--text2)',lineHeight:1.5,marginBottom:12}}>{b.notes}</p>}<p style={{fontSize:12,fontWeight:800,color:'var(--text2)',textTransform:'uppercase',letterSpacing:.5,marginBottom:8}}>Subtasks</p>{b.subtasks.map(s=><div key={s.id} style={{display:'flex',alignItems:'center',gap:9,padding:'7px 0',borderBottom:'1px solid var(--border)'}}><button onClick={()=>toggleSub(s.id)} style={{width:21,height:21,borderRadius:6,border:s.done?'none':'2px solid var(--border)',background:s.done?buildColor[b.status]:'transparent',display:'flex',alignItems:'center',justifyContent:'center'}}>{s.done&&<Icon name="check" size={12} color="#fff"/>}</button><span style={{flex:1,fontSize:14,textDecoration:s.done?'line-through':'none',color:s.done?'var(--text2)':'var(--text)'}}>{s.text}</span><button onClick={()=>remSub(s.id)} style={{background:'none',border:'none',color:'var(--text2)'}}><Icon name="x" size={12}/></button></div>)}<div style={{display:'flex',gap:8,marginTop:10}}><input value={sub} onChange={e=>setSub(e.target.value)} onKeyDown={e=>{if(e.key==='Enter'&&sub.trim()){addSub(sub.trim());setSub('')}}} placeholder="Add subtask..." style={{flex:1,background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:8,padding:'9px 11px',color:'var(--text)'}}/><Btn onClick={()=>{if(sub.trim()){addSub(sub.trim());setSub('')}}} variant="secondary">Add</Btn></div><div style={{display:'flex',gap:8,marginTop:14}}>{b.status!=='Done'&&<Btn onClick={advance} variant="secondary" style={{flex:1,color:'var(--mandir)'}}><Icon name="arrow" size={14}/> Move</Btn>}<Btn onClick={edit} variant="secondary"><Icon name="edit" size={16}/></Btn><Btn onClick={del} variant="danger"><Icon name="trash" size={16}/></Btn></div></div>}</div>
+function groupByDate(items,dateKey="dueDate"){
+const grouped={
+Overdue:[],
+Today:[],
+Tomorrow:[],
+"This Week":[],
+Upcoming:[],
+"No Date":[]
+};
+items.forEach(item=>{
+const d=item[dateKey];
+if(!d){
+grouped["No Date"].push(item);
+return;
 }
-
-function AddTaskModal({onClose,onSave}){const [form,setForm]=useState({title:'',category:'personal',dueDate:today(),notes:'',pinned:false});const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));const saveIt=()=>{if(!form.title.trim())return;onSave({id:uid(),...form,status:'todo'});onClose()};return <Modal title="New Task" onClose={onClose}><Field label="Task"><Input value={form.title} onChange={f('title')} placeholder="What needs to be done?"/></Field><Field label="Category"><div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>{Object.entries(catLabel).map(([k,l])=><button key={k} onClick={()=>setForm(x=>({...x,category:k}))} style={{background:form.category===k?catColor[k]+'33':'var(--surface2)',color:form.category===k?catColor[k]:'var(--text2)',border:`1px solid ${form.category===k?catColor[k]:'var(--border)'}`,borderRadius:10,padding:'11px 8px',fontSize:13,fontWeight:800}}>{l}</button>)}</div></Field><Field label="Quick Date"><div style={{display:'flex',gap:7,flexWrap:'wrap'}}>{[['Today',today()],['Tomorrow',tomorrow()],['+3 days',daysFrom(3)],['Next week',daysFrom(7)],['No date','']].map(([l,v])=><button key={l} onClick={()=>setForm(x=>({...x,dueDate:v}))} style={{...miniBtn,color:form.dueDate===v?'var(--accent)':'var(--text2)',borderColor:form.dueDate===v?'var(--accent)':'var(--border)'}}>{l}</button>)}</div></Field><Field label="Custom Date"><Input type="date" value={form.dueDate} onChange={f('dueDate')}/></Field><Field label="Notes"><Input rows={2} value={form.notes} onChange={f('notes')} placeholder="Optional"/></Field><Btn onClick={saveIt} style={{width:'100%'}}>Add Task</Btn></Modal>}
-
-function SettingsModal({onClose,data,setData,dark,setDark}){const fileRef=useRef();const exportData=()=>{const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`lifedash-backup-${today()}.json`;a.click()};const importData=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{setData(JSON.parse(ev.target.result));alert('Imported!');onClose()}catch{alert('Invalid file')}};r.readAsText(file);e.target.value=''};return <Modal title="Settings" onClose={onClose}><Field label="Appearance"><Btn variant="secondary" onClick={()=>setDark(!dark)} style={{width:'100%'}}>{dark?'Switch to Light Mode':'Switch to Dark Mode'}</Btn></Field><Field label="Backup"><div style={{display:'grid',gap:10}}><Btn variant="secondary" onClick={exportData}><Icon name="download" size={18}/>Export JSON Backup</Btn><Btn variant="secondary" onClick={()=>fileRef.current.click()}><Icon name="upload" size={18}/>Import JSON Backup</Btn><input ref={fileRef} type="file" accept=".json" onChange={importData} style={{display:'none'}}/></div></Field><div style={{background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:12,padding:14}}><p style={{fontWeight:800,marginBottom:6}}>Install as app</p><p style={{fontSize:13,color:'var(--text2)',lineHeight:1.6}}>In Safari: Share â Add to Home Screen.</p></div></Modal>}
-
-function SearchView({data,onClose}){const [q,setQ]=useState('');const s=q.toLowerCase();const rows=[];if(s){data.tasks.forEach(t=>{if((t.title+t.notes).toLowerCase().includes(s))rows.push(['Task',t.title,catLabel[t.category]])});data.orders.forEach(o=>{if((o.customer+o.item+o.notes).toLowerCase().includes(s))rows.push(['Order',o.customer,o.item])});data.builds.forEach(b=>{if((b.event+b.buildName+b.notes).toLowerCase().includes(s))rows.push(['Build',b.buildName,b.event])});data.inbox.forEach(i=>{if(i.text.toLowerCase().includes(s))rows.push(['Inbox',i.text,''])})}return <div style={{padding:'20px 16px 104px'}}><div style={{display:'flex',gap:10,marginBottom:18}}><input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="Search everything..." style={{flex:1,background:'var(--surface)',border:'1.5px solid var(--accent)',borderRadius:12,padding:'12px 14px',color:'var(--text)',outline:'none'}}/><Btn variant="secondary" onClick={onClose}>Cancel</Btn></div>{!q&&<p style={{textAlign:'center',color:'var(--text2)',marginTop:50}}>Start typing to search</p>}{q&&rows.length===0&&<p style={{textAlign:'center',color:'var(--text2)',marginTop:50}}>No results</p>}{rows.map((r,i)=><div key={i} style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:12,padding:13,marginBottom:8}}><p style={{fontWeight:800,fontSize:14}}>{r[1]}</p><p style={{color:'var(--text2)',fontSize:12,marginTop:3}}>{r[0]} {r[2]&&'â¢ '+r[2]}</p></div>)}</div>}
-
+if(d<today()){
+grouped.Overdue.push(item);
+return;
+}
+if(d===today()){
+grouped.Today.push(item);
+return;
+}
+if(d===daysFrom(1)){
+grouped.Tomorrow.push(item);
+return;
+}
+const diff=(new Date(d)-new Date(today()))/(1000*60*60*24);
+if(diff<=7){
+grouped["This Week"].push(item);
+}else{
+grouped.Upcoming.push(item);
+}
+});
+return grouped;
+}
+function Agenda({tasks,setTasks,setUndo,openTask}){
+const pending=tasks
+.filter(t=>t.status!=="done")
+.sort((a,b)=>{
+if(!a.dueDate)return 1;
+if(!b.dueDate)return -1;
+return a.dueDate.localeCompare(b.dueDate);
+});
+const grouped=groupByDate(pending);
+const toggle=(id)=>{
+let old=null;
+setTasks(ts=>ts.map(t=>{
+if(t.id!==id)return t;
+old={...t};
+return {...t,status:"done",completedAt:today()};
+}));
+setUndo(old);
+};
+const changeDate=(id,date)=>{
+setTasks(ts=>ts.map(t=>t.id===id?{...t,dueDate:date}:t));
+};
+return(
+<div className="page">
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<h1 className="pageTitle">Agenda</h1>
+<button className="btn" onClick={openTask}>Add</button>
+</div>
+{pending.length===0&&<div className="empty">Nothing pending.</div>}
+{Object.entries(grouped).map(([section,items])=>{
+if(!items.length)return null;
+return(
+<div key={section}>
+<div className="sectionTitle">{section}</div>
+{items.map(task=>(
+<TaskCard
+key={task.id}
+task={task}
+toggle={toggle}
+changeDate={changeDate}
+setTasks={setTasks}
+/>
+))}
+</div>
+);
+})}
+</div>
+);
+}
+function TaskCard({task,toggle,changeDate,setTasks}){
+const [open,setOpen]=useState(false);
+const [custom,setCustom]=useState(false);
+return(
+<div className="card">
+<div className="row">
+<button className="checkbox" onClick={()=>toggle(task.id)}></button>
+<div className="grow" onClick={()=>setOpen(!open)}>
+<div className="title">{task.title}</div>
+<div className="chips">
+<Chip color={taskColors[task.category]}>{task.category}</Chip>
+{task.dueDate&&<Chip>{fmt(task.dueDate)}</Chip>}
+{task.pinned&&<Chip color="var(--gold)">Pinned</Chip>}
+</div>
+{task.notes&&<div className="sub">{task.notes}</div>}
+</div>
+<button className="iconBtn" onClick={()=>setTasks(ts=>ts.map(t=>t.id===task.id?{...t,pinned:!t.pinned}:t))}>Pin</button>
+</div>
+{open&&(
+<div className="actions">
+<button className="btn small secondary" onClick={()=>changeDate(task.id,today())}>Today</button>
+<button className="btn small secondary" onClick={()=>changeDate(task.id,daysFrom(1))}>Tomorrow</button>
+<button className="btn small secondary" onClick={()=>changeDate(task.id,daysFrom(3))}>+3 days</button>
+<button className="btn small secondary" onClick={()=>changeDate(task.id,daysFrom(7))}>Next week</button>
+<button className="btn small secondary" onClick={()=>changeDate(task.id,"")}>No date</button>
+<button className="btn small secondary" onClick={()=>setCustom(!custom)}>Custom</button>
+{custom&&<Input type="date" value={task.dueDate||""} onChange={e=>changeDate(task.id,e.target.value)}/>}
+</div>
+)}
+</div>
+);
+}
+function Inbox({inbox,setInbox,setTasks,setOrders}){
+const [text,setText]=useState("");
+const add=()=>{
+if(!text.trim())return;
+setInbox(items=>[{id:uid(),text:text.trim(),createdAt:today(),pinned:false},...items]);
+setText("");
+};
+const remove=(id)=>{
+setInbox(items=>items.filter(i=>i.id!==id));
+};
+const categorize=(item,type)=>{
+remove(item.id);
+if(type==="done")return;
+if(type==="order"){
+setOrders(os=>[{
+id:uid(),
+customer:"",
+item:item.text,
+source:"Quick Add",
+price:"",
+dueDate:"",
+stage:"Inquiry",
+notes:"Created from Inbox"
+},...os]);
+return;
+}
+const category=type==="later"?"Other":type;
+setTasks(ts=>[{
+id:uid(),
+title:item.text,
+category,
+dueDate:type==="later"?"":today(),
+status:"todo",
+pinned:false,
+notes:""
+},...ts]);
+};
+return(
+<div className="page">
+<h1 className="pageTitle">Inbox</h1>
+<div className="quick">
+<div className="quickRow">
+<input className="input" value={text} onChange={e=>setText(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")add();}} placeholder="Quick dump anything..."/>
+<button className="btn" onClick={add}>Add</button>
+</div>
+<div className="sub">Fast capture tasks or orders. Sort later.</div>
+</div>
+{inbox.length===0&&<div className="empty">Inbox empty.</div>}
+{inbox.map(item=>(
+<div className="card" key={item.id}>
+<div className="row">
+<div className="grow">
+<div className="title">{item.text}</div>
+<div className="sub">Inbox item</div>
+</div>
+<button className="iconBtn" onClick={()=>remove(item.id)}>X</button>
+</div>
+<div className="actions">
+<button className="btn small secondary" onClick={()=>categorize(item,"Personal")}>Personal</button>
+<button className="btn small secondary" onClick={()=>categorize(item,"Kala")}>Kala Task</button>
+<button className="btn small secondary" onClick={()=>categorize(item,"Mandir")}>Mandir</button>
+<button className="btn small" onClick={()=>categorize(item,"order")}>Order</button>
+<button className="btn small secondary" onClick={()=>categorize(item,"later")}>Later</button>
+<button className="btn small secondary" onClick={()=>categorize(item,"done")}>Done</button>
+</div>
+</div>
+))}
+</div>
+);
+}
+function Orders({orders,setOrders}){
+const [show,setShow]=useState(false);
+const [edit,setEdit]=useState(null);
+const [filter,setFilter]=useState("active");
+const active=o=>!["Delivered"].includes(o.stage);
+const visible=orders.filter(o=>{
+if(filter==="all")return true;
+if(filter==="active")return active(o);
+if(filter==="delivered")return o.stage==="Delivered";
+return true;
+}).sort((a,b)=>{
+if(!a.dueDate)return 1;
+if(!b.dueDate)return -1;
+return a.dueDate.localeCompare(b.dueDate);
+});
+const grouped=groupByDate(visible);
+grouped.Delivered=visible.filter(o=>o.stage==="Delivered");
+Object.keys(grouped).forEach(k=>{
+if(k!=="Delivered"){
+grouped[k]=grouped[k].filter(o=>o.stage!=="Delivered");
+}
+});
+const nextStage=(id)=>{
+setOrders(os=>os.map(o=>{
+if(o.id!==id)return o;
+const i=orderStages.indexOf(o.stage);
+return {...o,stage:orderStages[Math.min(i+1,orderStages.length-1)]};
+}));
+};
+const remove=(id)=>{
+if(confirm("Delete order?")){
+setOrders(os=>os.filter(o=>o.id!==id));
+}
+};
+return(
+<div className="page">
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<h1 className="pageTitle">Orders</h1>
+<button className="btn" onClick={()=>{setEdit(null);setShow(true);}}>Add</button>
+</div>
+<div className="actions" style={{marginTop:-8,marginBottom:14}}>
+<button className={"btn small "+(filter==="active"?"":"secondary")} onClick={()=>setFilter("active")}>Active</button>
+<button className={"btn small "+(filter==="all"?"":"secondary")} onClick={()=>setFilter("all")}>All</button>
+<button className={"btn small "+(filter==="delivered"?"":"secondary")} onClick={()=>setFilter("delivered")}>Delivered</button>
+</div>
+{visible.length===0&&<div className="empty">No orders.</div>}
+{Object.entries(grouped).map(([section,items])=>{
+if(!items.length)return null;
+return(
+<div key={section}>
+<div className="sectionTitle">{section}</div>
+{items.map(order=>(
+<OrderCard
+key={order.id}
+order={order}
+nextStage={nextStage}
+onEdit={()=>{setEdit(order);setShow(true);}}
+onDelete={()=>remove(order.id)}
+/>
+))}
+</div>
+);
+})}
+{show&&(
+<OrderModal
+order={edit}
+onClose={()=>setShow(false)}
+onSave={(order)=>{
+if(edit){
+setOrders(os=>os.map(o=>o.id===order.id?order:o));
+}else{
+setOrders(os=>[order,...os]);
+}
+setShow(false);
+}}
+/>
+)}
+</div>
+);
+}
+function OrderCard({order,nextStage,onEdit,onDelete}){
+return(
+<div className="card">
+<div className="row">
+<div className="grow">
+<div className="title">{order.customer||"No customer yet"}</div>
+<div className="sub">{order.item}</div>
+<div className="chips">
+<Chip color="var(--purple)">{order.stage}</Chip>
+{order.dueDate&&<Chip>{fmt(order.dueDate)}</Chip>}
+{order.price&&<Chip color="var(--gold)">${order.price}</Chip>}
+<Chip>{order.source}</Chip>
+</div>
+{order.notes&&<div className="sub">{order.notes}</div>}
+</div>
+</div>
+<div className="stageLine">
+{orderStages.map(s=><span key={s} className={"stagePill "+(s===order.stage?"active":"")}>{s}</span>)}
+</div>
+<div className="actions">
+{order.stage!=="Delivered"&&<button className="btn small" onClick={()=>nextStage(order.id)}>Next</button>}
+<button className="btn small secondary" onClick={onEdit}>Edit</button>
+<button className="btn small danger" onClick={onDelete}>Delete</button>
+</div>
+</div>
+);
+}
+function OrderModal({order,onSave,onClose}){
+const [form,setForm]=useState(order||{
+id:uid(),
+customer:"",
+item:"",
+source:"Instagram DM",
+price:"",
+dueDate:"",
+stage:"Inquiry",
+notes:""
+});
+const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
+return(
+<Modal title={order?"Edit Order":"New Order"} onClose={onClose}>
+<Field label="Customer"><Input value={form.customer} onChange={f("customer")} placeholder="Customer name"/></Field>
+<Field label="Item"><Input value={form.item} onChange={f("item")} placeholder="What are they ordering?"/></Field>
+<Field label="Source"><Input value={form.source} onChange={f("source")} placeholder="Instagram DM, family, etc."/></Field>
+<Field label="Price"><Input value={form.price} onChange={f("price")} placeholder="85"/></Field>
+<Field label="Due Date"><Input type="date" value={form.dueDate} onChange={f("dueDate")}/></Field>
+<Field label="Stage">
+<select className="input" value={form.stage} onChange={f("stage")}>
+{orderStages.map(s=><option key={s}>{s}</option>)}
+</select>
+</Field>
+<Field label="Notes"><TextArea value={form.notes} onChange={f("notes")} placeholder="Details"/></Field>
+<button className="btn" style={{width:"100%"}} onClick={()=>onSave(form)}>Save Order</button>
+</Modal>
+);
+}
+function Builds({builds,setBuilds}){
+const [show,setShow]=useState(false);
+const [edit,setEdit]=useState(null);
+const [open,setOpen]=useState({});
+const remove=(id)=>{
+if(confirm("Delete build?")){
+setBuilds(bs=>bs.filter(b=>b.id!==id));
+}
+};
+const next=(id)=>{
+setBuilds(bs=>bs.map(b=>{
+if(b.id!==id)return b;
+const i=buildStages.indexOf(b.status);
+return {...b,status:buildStages[Math.min(i+1,buildStages.length-1)]};
+}));
+};
+const toggleSub=(bid,sid)=>{
+setBuilds(bs=>bs.map(b=>b.id!==bid?b:{...b,subtasks:b.subtasks.map(s=>s.id===sid?{...s,done:!s.done}:s)}));
+};
+const addSub=(bid,text)=>{
+if(!text.trim())return;
+setBuilds(bs=>bs.map(b=>b.id!==bid?b:{...b,subtasks:[...b.subtasks,{id:uid(),text:text.trim(),done:false}]}));
+};
+return(
+<div className="page">
+<div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+<h1 className="pageTitle">Mandir Builds</h1>
+<button className="btn" onClick={()=>{setEdit(null);setShow(true);}}>Add</button>
+</div>
+{builds.length===0&&<div className="empty">No builds.</div>}
+{builds.map(build=>(
+<BuildCard
+key={build.id}
+build={build}
+open={!!open[build.id]}
+toggleOpen={()=>setOpen(o=>({...o,[build.id]:!o[build.id]}))}
+next={()=>next(build.id)}
+edit={()=>{setEdit(build);setShow(true);}}
+remove={()=>remove(build.id)}
+toggleSub={sid=>toggleSub(build.id,sid)}
+addSub={text=>addSub(build.id,text)}
+/>
+))}
+{show&&(
+<BuildModal
+build={edit}
+onClose={()=>setShow(false)}
+onSave={(b)=>{
+if(edit){
+setBuilds(bs=>bs.map(x=>x.id===b.id?b:x));
+}else{
+setBuilds(bs=>[b,...bs]);
+}
+setShow(false);
+}}
+/>
+)}
+</div>
+);
+}
+function BuildCard({build,open,toggleOpen,next,edit,remove,toggleSub,addSub}){
+const [newSub,setNewSub]=useState("");
+const done=build.subtasks.filter(s=>s.done).length;
+const pct=build.subtasks.length?Math.round(done/build.subtasks.length*100):0;
+return(
+<div className="card">
+<div className="row">
+<div className="grow" onClick={toggleOpen}>
+<div className="sub" style={{color:"var(--orange)",fontWeight:800}}>{build.event}</div>
+<div className="title">{build.buildName}</div>
+<div className="chips">
+<Chip color="var(--orange)">{build.status}</Chip>
+{build.section&&<Chip>{build.section}</Chip>}
+{build.date&&<Chip>{fmt(build.date)}</Chip>}
+</div>
+</div>
+<button className="iconBtn" onClick={toggleOpen}>{open?"Up":"Down"}</button>
+</div>
+{build.subtasks.length>0&&(
+<div className="progress">
+<div className="progressFill" style={{width:pct+"%"}}></div>
+</div>
+)}
+{open&&(
+<div style={{marginTop:12}}>
+{build.people&&<div className="sub">People: {build.people}</div>}
+{build.materials&&<div className="sub">Materials: {build.materials}</div>}
+{build.notes&&<div className="sub">{build.notes}</div>}
+<div className="sectionTitle">Subtasks</div>
+{build.subtasks.map(s=>(
+<div key={s.id} className="row" style={{marginBottom:8}}>
+<button className={"checkbox "+(s.done?"done":"")} onClick={()=>toggleSub(s.id)}>{s.done?"✓":""}</button>
+<div className="grow title" style={{fontSize:14,textDecoration:s.done?"line-through":"none",color:s.done?"var(--muted)":"var(--text)"}}>{s.text}</div>
+</div>
+))}
+<div className="quickRow" style={{marginTop:10}}>
+<input className="input" value={newSub} onChange={e=>setNewSub(e.target.value)} placeholder="Add subtask"/>
+<button className="btn" onClick={()=>{addSub(newSub);setNewSub("");}}>Add</button>
+</div>
+<div className="actions">
+{build.status!=="Done"&&<button className="btn small" onClick={next}>Next</button>}
+<button className="btn small secondary" onClick={edit}>Edit</button>
+<button className="btn small danger" onClick={remove}>Delete</button>
+</div>
+</div>
+)}
+</div>
+);
+}
+function BuildModal({build,onSave,onClose}){
+const [form,setForm]=useState(build||{
+id:uid(),
+event:"",
+buildName:"",
+section:"",
+status:"Idea",
+date:"",
+people:"",
+materials:"",
+notes:"",
+subtasks:[]
+});
+const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
+return(
+<Modal title={build?"Edit Build":"New Build"} onClose={onClose}>
+<Field label="Event"><Input value={form.event} onChange={f("event")} placeholder="Diwali 2026"/></Field>
+<Field label="Build Name"><Input value={form.buildName} onChange={f("buildName")} placeholder="Sinhasan"/></Field>
+<Field label="Section"><Input value={form.section} onChange={f("section")} placeholder="Main hall"/></Field>
+<Field label="Date"><Input type="date" value={form.date} onChange={f("date")}/></Field>
+<Field label="Status">
+<select className="input" value={form.status} onChange={f("status")}>
+{buildStages.map(s=><option key={s}>{s}</option>)}
+</select>
+</Field>
+<Field label="People"><Input value={form.people} onChange={f("people")} placeholder="Dev, Raj"/></Field>
+<Field label="Materials"><TextArea value={form.materials} onChange={f("materials")} placeholder="Foam, paint, MDF"/></Field>
+<Field label="Notes"><TextArea value={form.notes} onChange={f("notes")} placeholder="Details"/></Field>
+<button className="btn" style={{width:"100%"}} onClick={()=>onSave(form)}>Save Build</button>
+</Modal>
+);
+}
+function TaskModal({onClose,onSave}){
+const [form,setForm]=useState({
+id:uid(),
+title:"",
+category:"Personal",
+dueDate:today(),
+status:"todo",
+pinned:false,
+notes:""
+});
+const f=k=>e=>setForm(x=>({...x,[k]:e.target.value}));
+return(
+<Modal title="New Task" onClose={onClose}>
+<Field label="Task"><Input value={form.title} onChange={f("title")} placeholder="What needs to be done?"/></Field>
+<Field label="Category">
+<select className="input" value={form.category} onChange={f("category")}>
+<option>Personal</option>
+<option>Kala</option>
+<option>Mandir</option>
+<option>Other</option>
+</select>
+</Field>
+<Field label="Due Date"><Input type="date" value={form.dueDate} onChange={f("dueDate")}/></Field>
+<Field label="Notes"><TextArea value={form.notes} onChange={f("notes")} placeholder="Optional"/></Field>
+<button className="btn" style={{width:"100%"}} onClick={()=>{if(form.title.trim())onSave(form);}}>Save Task</button>
+</Modal>
+);
+}
+function Settings({data,setData,onClose}){
+const exportData=()=>{
+const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+const a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="life-dashboard-backup-"+today()+".json";
+a.click();
+};
+const importData=e=>{
+const file=e.target.files[0];
+if(!file)return;
+const reader=new FileReader();
+reader.onload=ev=>{
+try{
+setData(JSON.parse(ev.target.result));
+alert("Imported");
+onClose();
+}catch{
+alert("Bad file");
+}
+};
+reader.readAsText(file);
+};
+return(
+<Modal title="Settings" onClose={onClose}>
+<div className="card">
+<div className="title">Install as app</div>
+<div className="sub">Open in Safari, tap Share, then Add to Home Screen.</div>
+</div>
+<div className="actions">
+<button className="btn" onClick={exportData}>Export Backup</button>
+<label className="btn secondary">
+Import Backup
+<input type="file" accept=".json" style={{display:"none"}} onChange={importData}/>
+</label>
+</div>
+<div className="card" style={{marginTop:14}}>
+<div className="title">Data note</div>
+<div className="sub">This app saves data on this phone/browser using local storage. Export backups often.</div>
+</div>
+</Modal>
+);
+}
 function App(){
- const [dark,setDark]=useState(true);const [tab,setTab]=useState('agenda');const [search,setSearch]=useState(false);const [settings,setSettings]=useState(false);const [addTask,setAddTask]=useState(false);
- const [data,setDataRaw]=useState(()=>load()||SAMPLE);
- const setData=fn=>setDataRaw(prev=>{const next=typeof fn==='function'?fn(prev):fn;save(next);return next});
- const setInbox=fn=>setData(d=>({...d,inbox:typeof fn==='function'?fn(d.inbox):fn}));
- const setTasks=fn=>setData(d=>({...d,tasks:typeof fn==='function'?fn(d.tasks):fn}));
- const setOrders=fn=>setData(d=>({...d,orders:typeof fn==='function'?fn(d.orders):fn}));
- const setBuilds=fn=>setData(d=>({...d,builds:typeof fn==='function'?fn(d.builds):fn}));
- useEffect(()=>{if(!dark)document.documentElement.setAttribute('data-light','');else document.documentElement.removeAttribute('data-light')},[dark]);
- const tabs=[['agenda','Agenda','agenda','var(--accent)'],['inbox','Inbox','inbox','var(--personal)'],['kala','Kala','box','var(--kala)'],['mandir','Mandir','temple','var(--mandir)']];
- return <div style={{maxWidth:600,margin:'0 auto',minHeight:'100vh'}}>
-  <div style={{position:'sticky',top:0,zIndex:100,background:'var(--bg)',borderBottom:'1px solid var(--border)',padding:'12px 16px',display:'flex',alignItems:'center',justifyContent:'space-between',backdropFilter:'blur(18px)'}}><div style={{display:'flex',alignItems:'center',gap:8}}><span style={{fontSize:20}}>ð</span><b>Life Dashboard</b></div><div style={{display:'flex',gap:8}}><button onClick={()=>setSearch(true)} style={headerBtn}><Icon name="search" size={18}/></button><button onClick={()=>setSettings(true)} style={{...headerBtn,fontSize:16}}>âï¸</button></div></div>
-  {search?<SearchView data={data} onClose={()=>setSearch(false)}/>:tab==='agenda'?<AgendaTab tasks={data.tasks} setTasks={setTasks} openAddTask={()=>setAddTask(true)}/>:tab==='inbox'?<InboxTab inbox={data.inbox} setInbox={setInbox} setTasks={setTasks}/>:tab==='kala'?<KalaTab orders={data.orders} setOrders={setOrders}/>:<MandirTab builds={data.builds} setBuilds={setBuilds}/>} 
-  <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:600,background:'var(--bg)',borderTop:'1px solid var(--border)',display:'flex',paddingBottom:'env(safe-area-inset-bottom)',zIndex:90}}>{tabs.map(([id,label,icon,color])=>{const active=tab===id&&!search;return <button key={id} onClick={()=>{setTab(id);setSearch(false)}} style={{flex:1,padding:'10px 0 8px',background:'none',border:'none',color:active?color:'var(--text2)',display:'flex',flexDirection:'column',alignItems:'center',gap:3,position:'relative'}}><Icon name={icon} size={22} color={active?color:'var(--text2)'}/><span style={{fontSize:10,fontWeight:active?800:600}}>{label}</span>{id==='inbox'&&data.inbox.length>0&&<span style={{position:'absolute',top:6,right:'calc(50% - 18px)',background:'var(--personal)',color:'#fff',borderRadius:99,fontSize:9,fontWeight:800,padding:'1px 5px'}}>{data.inbox.length}</span>}{active&&<span style={{position:'absolute',bottom:0,width:24,height:2,borderRadius:4,background:color}}/>}</button>})}</div>
-  {addTask&&<AddTaskModal onClose={()=>setAddTask(false)} onSave={task=>setTasks(ts=>[task,...ts])}/>} {settings&&<SettingsModal onClose={()=>setSettings(false)} data={data} setData={setData} dark={dark} setDark={setDark}/>} 
- </div>
+const [data,setDataRaw]=useState(()=>load()||SAMPLE);
+const [tab,setTab]=useState("agenda");
+const [settings,setSettings]=useState(false);
+const [taskModal,setTaskModal]=useState(false);
+const [undo,setUndo]=useState(null);
+useEffect(()=>save(data),[data]);
+const setData=next=>{
+setDataRaw(prev=>typeof next==="function"?next(prev):next);
+};
+const setInbox=fn=>setData(d=>({...d,inbox:typeof fn==="function"?fn(d.inbox):fn}));
+const setTasks=fn=>setData(d=>({...d,tasks:typeof fn==="function"?fn(d.tasks):fn}));
+const setOrders=fn=>setData(d=>({...d,orders:typeof fn==="function"?fn(d.orders):fn}));
+const setBuilds=fn=>setData(d=>({...d,builds:typeof fn==="function"?fn(d.builds):fn}));
+useEffect(()=>{
+if(!undo)return;
+const timer=setTimeout(()=>setUndo(null),5000);
+return()=>clearTimeout(timer);
+},[undo]);
+const restoreUndo=()=>{
+if(!undo)return;
+setTasks(ts=>ts.map(t=>t.id===undo.id?undo:t));
+setUndo(null);
+};
+const tabs=[
+{id:"agenda",label:"Agenda",icon:"A"},
+{id:"inbox",label:"Inbox",icon:"I"},
+{id:"orders",label:"Orders",icon:"O"},
+{id:"builds",label:"Builds",icon:"B"}
+];
+return(
+<div className="app">
+<div className="header">
+<div className="brand">Life Dashboard</div>
+<div className="headerBtns">
+<button className="iconBtn" onClick={()=>setTaskModal(true)}>Add</button>
+<button className="iconBtn" onClick={()=>setSettings(true)}>Set</button>
+</div>
+</div>
+{tab==="agenda"&&<Agenda tasks={data.tasks} setTasks={setTasks} setUndo={setUndo} openTask={()=>setTaskModal(true)}/>}
+{tab==="inbox"&&<Inbox inbox={data.inbox} setInbox={setInbox} setTasks={setTasks} setOrders={setOrders}/>}
+{tab==="orders"&&<Orders orders={data.orders} setOrders={setOrders}/>}
+{tab==="builds"&&<Builds builds={data.builds} setBuilds={setBuilds}/>}
+<div className="bottomNav">
+{tabs.map(t=>(
+<button key={t.id} className={"navBtn "+(tab===t.id?"active":"")} onClick={()=>setTab(t.id)}>
+<span className="navIcon">{t.icon}</span>
+{t.label}
+</button>
+))}
+</div>
+{undo&&(
+<div className="undo">
+<div>Task completed</div>
+<button className="btn small" onClick={restoreUndo}>Undo</button>
+</div>
+)}
+{taskModal&&(
+<TaskModal
+onClose={()=>setTaskModal(false)}
+onSave={(task)=>{
+setTasks(ts=>[task,...ts]);
+setTaskModal(false);
+}}
+/>
+)}
+{settings&&<Settings data={data} setData={setData} onClose={()=>setSettings(false)}/>}
+</div>
+);
 }
-const headerBtn={background:'var(--surface)',border:'1px solid var(--border)',borderRadius:10,padding:'8px 10px',color:'var(--text2)'};
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
 </script>
 <script>
-const manifest={name:'Life Dashboard',short_name:'LifeDash',description:'Personal life organizer',start_url:'.',display:'standalone',background_color:'#0f0f11',theme_color:'#0f0f11',orientation:'portrait',icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%230f0f11' rx='80'/%3E%3Ctext x='256' y='340' font-size='260' text-anchor='middle'%3Eð%3C/text%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml'}]};
-const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});const url=URL.createObjectURL(blob);const link=document.createElement('link');link.rel='manifest';link.href=url;document.head.appendChild(link);
+const manifest={
+name:"Life Dashboard",
+short_name:"LifeDash",
+start_url:".",
+display:"standalone",
+background_color:"#0f0f11",
+theme_color:"#0f0f11",
+orientation:"portrait"
+};
+const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+const url=URL.createObjectURL(blob);
+const link=document.createElement("link");
+link.rel="manifest";
+link.href=url;
+document.head.appendChild(link);
 </script>
 </body>
 </html>
