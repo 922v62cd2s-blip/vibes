@@ -1197,7 +1197,23 @@ setTaskModal(false);
 );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+try {
+  const saved = localStorage.getItem("life_dashboard_full_v2");
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    if (!parsed.tasks || !parsed.inbox || !parsed.orders || !parsed.builds) {
+      localStorage.removeItem("life_dashboard_full_v2");
+    }
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(<App />);
+} catch (e) {
+  document.body.innerHTML =
+    '<pre style="color:white;background:#111;padding:20px;white-space:pre-wrap;font-size:14px;">' +
+    e.stack +
+    '</pre>';
+}
 </script>
 
 <script>
